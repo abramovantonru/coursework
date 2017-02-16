@@ -1,9 +1,7 @@
 
-appProg/.idea/
+appProg/.vs/
 appProg/bin/
-appProg/cmake-build-debug/
-appProg/public/
-appProg/mysql/
+appProg/obj/
 
 dataBase/assets/
 dataBase/public/
