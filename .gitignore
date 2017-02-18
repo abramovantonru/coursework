@@ -2,6 +2,7 @@
 appProg/.vs/
 appProg/bin/
 appProg/obj/
+appProg/packages/
 
 dataBase/assets/
 dataBase/public/
