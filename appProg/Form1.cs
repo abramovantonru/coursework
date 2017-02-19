@@ -14,6 +14,9 @@ namespace appProg
 {
     public partial class Form1 : Form
     {
+        private List<string> menuSections;
+        private DataGridView[] menuTables;
+
         int height = Screen.PrimaryScreen.Bounds.Height;
         int width = Screen.PrimaryScreen.Bounds.Width;
 
@@ -46,8 +49,9 @@ namespace appProg
                 20
             );
 
-            List<string> sections = DB.menuSections();
-            createTabs(sections);
+            menuSections = DB.getMenuSections();
+            createTabs(menuSections);
+            fillTab(0, getTabDataByName(menuSections[0]));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -61,48 +65,60 @@ namespace appProg
             Height = Screen.PrimaryScreen.Bounds.Height;
         }
 
+        private prewiewDish getTabDataByName(string name)
+        {
+            prewiewDish dishes = DB.getTabDishesByName(name);
+            //dishes.Add(new prewiewDish { id = 1, name = "123", weight = 12, cost = 15.30f });
+            //dishes.Add(new prewiewDish { id = 2, name = "456", weight = 16, cost = 75.90f });
+
+
+            return dishes;
+        }
+
+        private void fillTab(int index, prewiewDish dishes)
+        {
+            foreach (prewiewDish dish in dishes)
+                menuTables[index].Rows.Add(new object[] { dish.id, dish.name, dish.weight, dish.cost });
+        }
+
         private void createTabs(List<string> sections)
         {
             int menuHeight = this.menu.Height;
             int menuWidth = this.menu.Width;
-            int count = sections.Count;
-            DataGridView[] dataGridViews = new DataGridView[count];
-            int w = menuWidth - 40;
-            int columnsCount = 3;
+            int countSections = sections.Count();
+            menuTables = new DataGridView[sections.Count];
+            
             menuColumn[] columns = {
-                new menuColumn { name = "id", header = "№", width = w / 100 * 5 },
-                new menuColumn { name = "name", header = "Название", width = w / 100 * 70 },
-                new menuColumn { name = "cost", header = "Стоимость", width = w / 100 * 10 },
+                new menuColumn { name = "id", header = "№", width = menuWidth / 100 * 5 },
+                new menuColumn { name = "name", header = "Название", width = menuWidth / 100 * 65  - 40},
+                new menuColumn { name = "weight", header = "Вес, грамм", width = menuWidth / 100 * 15 },
+                new menuColumn { name = "cost", header = "Стоимость, руб.", width = menuWidth / 100 * 15 },
             };
-
-            for (int i = 0; i < count; i++)
+            int countColumns = columns.Count();
+            
+            for (int i = 0; i < countSections; i++)
             {
-                
-                TabPage myTabPage = new TabPage(sections[i]);
-                dataGridViews[i] = new DataGridView();
-                dataGridViews[i].Left = dataGridViews[i].Top = 20;
-                dataGridViews[i].Height = menuHeight - 60;
-                dataGridViews[i].Width = w;
 
-                for (int j = 0; j < columnsCount; j++)
+                TabPage myTabPage = new TabPage(sections[i]);
+                menuTables[i] = new DataGridView();
+                menuTables[i].Left = menuTables[i].Top = 20;
+                menuTables[i].Height = menuHeight - 60;
+                menuTables[i].Width = menuWidth - 40;
+                menuTables[i].RowHeadersVisible = false;
+                menuTables[i].ScrollBars = ScrollBars.Vertical;
+
+                for (int j = 0; j < countColumns; j++)
                 {
                     DataGridViewColumn column = new DataGridViewTextBoxColumn();
                     column.Width = columns[j].width;
                     column.Name = columns[j].name;
                     column.HeaderText = columns[j].header;
-                    dataGridViews[i].Columns.Add(column);
+                    menuTables[i].Columns.Add(column);
                 }
 
-                myTabPage.Controls.Add(dataGridViews[i]);
+                myTabPage.Controls.Add(menuTables[i]);
                 this.menu.TabPages.Add(myTabPage);
             }
-
-            for(int i = 0; i < 200; i++)
-            {
-                dataGridViews[0].Rows.Add("123");
-            }
-
-            
         }
 
         private void btnAppClose_Click(object sender, EventArgs e)
@@ -126,28 +142,66 @@ namespace appProg
 
         public class DBResult
         {
-            public bool success;
-            public string error;
-            public List<Object> data = new List<Object>();
+            public bool success = false;
+            public string error = "Неизвестная ошибка.";
+            public List<List<Object>> data = new List<List<Object>>();
         }
 
-        public static List<string> menuSections()
+        public static List<string> getMenuSections()
         {
             DB db = new DB();
             List<string> sections = new List<string>();
             DBResult result = db.exec("SELECT type FROM dish ORDER BY CAST(type AS CHAR)");
 
             if (result.success)
-                foreach(var row in result.data)
-                    sections.Add(row.ToString());
-           
+            {
+                int rows = result.data.Count();
+                for(int i = 0; i < rows; i++)
+                    sections.Add(result.data[i][0].ToString());
+            }
+
             return sections;
+        }
+
+        public static prewiewDish getTabDishesByName(string sectionName)
+        {
+            DB db = new DB();
+            prewiewDish dishes = new prewiewDish();
+            DBResult result = db.exec("SELECT id, name, weight, cost FROM dish WHERE type = '" + sectionName + "';");
+
+            if (result.success)
+            {
+                int rows = result.data.Count();
+                for (int i = 0; i < rows; i++)
+                {
+                    var row = result.data[i];
+
+                    var id = Convert.ToInt32(row[0]);
+                    var name = row[1].ToString();
+                    var weight = (float)row[2];
+                    var cost = (float)row[3];
+
+                    dishes.Add(new prewiewDish { id = id, name = name, weight = weight, cost = cost });
+                }
+               
+            }
+               
+            return dishes;
         }
 
 
         public void connect()
         {
-            connection = this.create();
+            try
+            {
+                connection = this.create();
+            }
+            catch (MySqlException e)
+            {
+                Console.WriteLine(e);
+                MessageBox.Show("Не удалось создать подключение к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
+            }
         }
 
         private void open()
@@ -159,8 +213,9 @@ namespace appProg
             catch (MySqlException e)
             {
                 Console.WriteLine(e);
+                MessageBox.Show("Не удалось открыть подключение к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
             }
-
         }
 
         public void disconnect()
@@ -180,51 +235,71 @@ namespace appProg
 
         private DBResult exec(string SQL)
         {
-            this.connect();
             DBResult result = new DBResult();
-            MySqlCommand query = new MySqlCommand(SQL, connection);
-            this.open();
+            try
+            {
+                this.connect();
 
-            MySqlDataReader reader = query.ExecuteReader();
-            if (reader.HasRows)
-            {
-                result.success = true;
-                while (reader.Read())
+                MySqlCommand query = new MySqlCommand(SQL, connection);
+                this.open();
+
+                MySqlDataReader reader = query.ExecuteReader();
+                if (reader.HasRows)
                 {
-                    Object[] values = new Object[reader.FieldCount];
-                    int fieldCount = reader.GetValues(values);
-                    for (int i = 0; i < fieldCount; i++)
-                        result.data.Add(values[i]);
+                    result.success = true;
+                    int row = 0;
+                    while (reader.Read())
+                    {
+                        result.data.Add(new List<Object>());
+                        Object[] values = new Object[reader.FieldCount];
+                        int fieldCount = reader.GetValues(values);
+                        for (int i = 0; i < fieldCount; i++)
+                            result.data[row].Add(values[i]);
+                        row++;
+                        
+                    }
+                    reader.Close();
                 }
-                reader.Close();
-            }else
+                else
+                {
+                    result.error = "По запросу получено 0 записей.";
+                }
+                this.disconnect();
+            }
+            catch (MySqlException e)
             {
-                result.success = false;
+                Console.WriteLine(e);
+                MessageBox.Show("Не удалось выполнить запрос к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine(e);
+                MessageBox.Show("Не известная ошибка при исполнении запроса.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
             }
 
-            this.disconnect();
             return result;
         }
     }
 
 
-    /*public class detailDish
+    public class detailDish
     {
-        public string article;
+        public int id;
         public string name;
         public float proteins; // белки
         public float fats; // жиры
         public float carbohydrates; // углеводы
+        public float weight;
         public float cost;
-    };*/
+    };
 
-    public class prewiewDish
+    public class prewiewDish : List<Object>
     {
-        public string article;
+        public int id;
         public string name;
-        public float proteins; // белки
-        public float fats; // жиры
-        public float carbohydrates; // углеводы
+        public float weight;
         public float cost;
     }
 
@@ -234,4 +309,5 @@ namespace appProg
         public string header;
         public int width;
     }
+   
 }
