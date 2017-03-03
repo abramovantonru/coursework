@@ -412,14 +412,20 @@ namespace appProg
 		}
 	}
 
-
+	/**
+	 * Other functions for magic
+	 * */
 	class Util {
-
+		/**
+		 * Get default image from resources
+		 * */
 		public static Image defaultImage() {
 			Image defaultImage = Resources.image_not_found;
 			return defaultImage;
 		}
-
+		/**
+		 * Convert from byte[] to Image datatype
+		 * */
 		public static Image bytesToImage(byte[] bytes)
 		{
 			using (var stream = new MemoryStream(bytes))
@@ -458,17 +464,18 @@ namespace appProg
 		private static string user = "mysql";
 		private static string password = "mysql";
 		private MySqlConnection connection;
-
 		/**
 		 * Class for work with response from DBResult
 		 * */
 		public class DBResult
 		{
-			public bool success = false;
-			public string error = "Неизвестная ошибка.";
-			public List<List<Object>> data = new List<List<Object>>();
+			public bool success = false; // status of response
+			public string error = "Неизвестная ошибка."; // default error
+			public List<List<Object>> data = new List<List<Object>>(); // main wrapper for data: rows and cols
 		}
-
+		/**
+		 * Get all exist tabs of menu from data base
+		 * */
 		public static List<string> getMenuSections()
 		{
 			DB db = new DB();
@@ -484,7 +491,9 @@ namespace appProg
 
 			return sections;
 		}
-
+		/**
+		 * Get tab of menu from data base by name of section
+		 * */
 		public static prewiewDish getTabDishesByName(string sectionName)
 		{
 			DB db = new DB();
@@ -508,7 +517,9 @@ namespace appProg
 			}
 			return dishes;
 		}
-
+		/**
+		 * Get image from data base by ID
+		 * */
 		public static Image getImageByID(int id)
 		{
 			DB db = new DB();
@@ -552,7 +563,9 @@ namespace appProg
 			}
 			return null;
 		}
-
+		/**
+		 * Get data for detail dish view by ID
+		 * */
 		public static detailDish getDishByID(int id)
 		{
 			DB db = new DB();
@@ -601,7 +614,9 @@ namespace appProg
 			}
 			return dish;
 		}
-
+		/**
+		 * Create connection
+		 * */
 		public void connect()
 		{
 			try
@@ -615,7 +630,9 @@ namespace appProg
 				Environment.Exit(-1);
 			}
 		}
-
+		/**
+		 * Open connection
+		 * */
 		private void open()
 		{
 			try
@@ -629,7 +646,9 @@ namespace appProg
 				Environment.Exit(-1);
 			}
 		}
-
+		/**
+		 * Delete/Close connection with data base
+		 * */
 		public void disconnect()
 		{
 			try {
@@ -640,7 +659,9 @@ namespace appProg
 				Environment.Exit(-1);
 			}
 		}
-
+		/**
+		 * Create mysql connection with data base by settings
+		 * */
 		private MySqlConnection create()
 		{
 			string connectionData =
@@ -650,7 +671,10 @@ namespace appProg
 				";pwd=" + password + ";";
 			return new MySqlConnection(connectionData);
 		}
-
+		/**
+		 * Main wrapper for work with data
+		 * Get data to DBResult object from data base
+		 * */
 		private DBResult exec(string SQL)
 		{
 			DBResult result = new DBResult();
