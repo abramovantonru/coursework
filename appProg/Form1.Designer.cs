@@ -41,6 +41,8 @@
 			this.btnCloseOrder = new System.Windows.Forms.Button();
 			this.btnAddToOrder = new System.Windows.Forms.Button();
 			this.countOfDetailDish = new System.Windows.Forms.TextBox();
+			this.btnIncCountDish = new System.Windows.Forms.Button();
+			this.btnDecCountDish = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnAppClose
@@ -157,16 +159,42 @@
 			// countOfDetailDish
 			// 
 			this.countOfDetailDish.Enabled = false;
-			this.countOfDetailDish.Location = new System.Drawing.Point(644, 14);
+			this.countOfDetailDish.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+			this.countOfDetailDish.Location = new System.Drawing.Point(645, 14);
+			this.countOfDetailDish.MaxLength = 2;
 			this.countOfDetailDish.Name = "countOfDetailDish";
-			this.countOfDetailDish.Size = new System.Drawing.Size(100, 20);
+			this.countOfDetailDish.Size = new System.Drawing.Size(30, 21);
 			this.countOfDetailDish.TabIndex = 13;
+			// 
+			// btnIncCountDish
+			// 
+			this.btnIncCountDish.Enabled = false;
+			this.btnIncCountDish.Location = new System.Drawing.Point(615, 11);
+			this.btnIncCountDish.Name = "btnIncCountDish";
+			this.btnIncCountDish.Size = new System.Drawing.Size(23, 23);
+			this.btnIncCountDish.TabIndex = 14;
+			this.btnIncCountDish.Text = "+";
+			this.btnIncCountDish.UseVisualStyleBackColor = true;
+			this.btnIncCountDish.Click += new System.EventHandler(this.IncCountDish_Click);
+			// 
+			// btnDecCountDish
+			// 
+			this.btnDecCountDish.Enabled = false;
+			this.btnDecCountDish.Location = new System.Drawing.Point(680, 12);
+			this.btnDecCountDish.Name = "btnDecCountDish";
+			this.btnDecCountDish.Size = new System.Drawing.Size(23, 23);
+			this.btnDecCountDish.TabIndex = 15;
+			this.btnDecCountDish.Text = "-";
+			this.btnDecCountDish.UseVisualStyleBackColor = true;
+			this.btnDecCountDish.Click += new System.EventHandler(this.DecCountDish_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(918, 656);
+			this.Controls.Add(this.btnDecCountDish);
+			this.Controls.Add(this.btnIncCountDish);
 			this.Controls.Add(this.countOfDetailDish);
 			this.Controls.Add(this.btnAddToOrder);
 			this.Controls.Add(this.btnCloseOrder);
@@ -206,6 +234,8 @@
 		private System.Windows.Forms.Button btnCloseOrder;
 		private System.Windows.Forms.Button btnAddToOrder;
 		private System.Windows.Forms.TextBox countOfDetailDish;
+		private System.Windows.Forms.Button btnIncCountDish;
+		private System.Windows.Forms.Button btnDecCountDish;
 	}
 }
 

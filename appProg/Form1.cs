@@ -9,7 +9,7 @@
  * - Create new order
  * 
  * */
- using appProg.Properties;
+using appProg.Properties;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
@@ -65,6 +65,26 @@ namespace appProg
 				width / 2,
 				40
 			);
+
+			//dish controls
+			this.btnAddToOrder.Location = new Point(
+				width / 2,
+				15
+			);
+			this.countOfDetailDish.Height = 50;
+			this.countOfDetailDish.Location = new Point(
+				this.btnAddToOrder.Bounds.Right + 10,
+				15
+			);
+			this.btnIncCountDish.Location = new Point(
+				this.countOfDetailDish.Bounds.Right + 10,
+				15
+			);
+			this.btnDecCountDish.Location = new Point(
+				this.btnIncCountDish.Bounds.Right + 2,
+				15
+			);
+
 
 			//order wrapper
 			this.order.Width = width / 2 - 30;
@@ -313,8 +333,11 @@ namespace appProg
 			{
 				btnAddToOrder.Enabled = true;
 				countOfDetailDish.Enabled = true;
+				btnIncCountDish.Enabled = true;
+				btnDecCountDish.Enabled = true;
 			}
 			selectedDish = dish;
+			setCountOfSelectedDish(1);
 		}
 		/**
 		 * Change tab index in menu
@@ -350,20 +373,62 @@ namespace appProg
 				detailImageWindow.Show();
 			}
 		}
+		/**
+		 * Order logic
+		 * */
+		 //event handler for create order
 		private void createOrder_Click(object sender, EventArgs e)
 		{
-			createOrder();
+			int idx = createOrder();
 			loadOrdersTabs();
+			order.SelectedIndex = idx;
 		}
+		//create(append) order in global MainWindow var "order" [optional by exist orderDish object]
+		private int createOrder(orderDish order = null)
+		{
+			int id = orders.Count;
+			if (order == null)
+			{
+				order = new orderDish();
+				order.name = "Новый заказ";
+				order.id = DB.getLastOrderID() + 1;
+			}
 
+			orders.Add(order);
+			return id;
+		}
+		//event handler for save order
 		private void saveOrder_Click(object sender, EventArgs e)
 		{
-			
+			int index = order.SelectedIndex;
+			if (index > -1) {
+				orders[index].name = "Заказ №" + saveOrder(index);
+				loadOrdersTabs();
+			}
+		}
+		//save order from global MainWindow var "order" by index to data base
+		private int saveOrder(int index) {
+			int id = -1;
+			int orderID = orderIDbyIdx(index);
+
+			if(orderID != -1) {
+				string json = getSerializeOrderItems(index);
+				if(json != "[]") {
+					/*if (DB.existOrderByID(orderID))
+						id = DB.updateOrder(json);
+					else
+						id = DB.insertOrder(json);*/
+					if (!DB.existOrderByID(orderID))
+						id = DB.insertOrder(json);
+				}
+			}
+
+			return id;
 		}
 
 		private void removeOrder_Click(object sender, EventArgs e)
 		{
-
+			
 			order.TabPages.Clear();
 		}
 
@@ -373,19 +438,12 @@ namespace appProg
 			if(index != -1) {
 				orders.RemoveAt(index);
 				loadOrdersTabs();
-			}
-		}
 
-		private int createOrder(orderDish order = null) {
-			int id = orders.Count;
-			if (order == null) {
-				order = new orderDish();
-				order.name = "Новый заказ";
-				order.id = DB.getLastOrderID() + 1;
+				int newIndex = index - 1;
+				if (newIndex < 0)
+					newIndex = 0;
+				order.SelectedIndex = newIndex;
 			}
-		
-			orders.Add(order);
-			return id;
 		}
 
 		private int findOrderDishIdxByDishID(int orderIdx, int id) {
@@ -435,6 +493,16 @@ namespace appProg
 			return idx;
 		}
 
+		private int orderIDbyIdx(int idx) {
+			int id = -1;
+			int count = orders.Count;
+
+			if (idx < count && orders[idx] != null)
+				id = orders[idx].id;
+
+			return idx;
+		}
+
 		private void addDishToOrder(int id, string name, float cost, int count, int orderIdx = -1) {
 			if(orderIdx == -1) {
 				orderIdx = createOrder();
@@ -476,7 +544,7 @@ namespace appProg
 				orderTables[i].ScrollBars = ScrollBars.Vertical;
 				orderTables[i].ReadOnly = true;
 				orderTables[i].AllowUserToAddRows = false;
-				orderTables[i].CellClick += new DataGridViewCellEventHandler(this.menuTableCell_Click);
+				//orderTables[i].CellClick += new DataGridViewCellEventHandler(this.menuTableCell_Click);
 
 				for (int j = 0; j < countColumns; j++)
 				{
@@ -500,6 +568,7 @@ namespace appProg
 			}
 			
 		}
+		
 		private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
 		{
 			if (e.ColumnIndex == 1) //
@@ -517,11 +586,51 @@ namespace appProg
 				}
 			}
 		}
+		
 		private void addToOrder_Click(object sender, EventArgs e)
 		{
 			int count = Convert.ToInt32(countOfDetailDish.Text);
-			MessageBox.Show(order.SelectedIndex.ToString());
 			addDishToOrder(selectedDish.id, selectedDish.name, selectedDish.cost, count, order.SelectedIndex);
+		}
+
+		private void DecCountDish_Click(object sender, EventArgs e)
+		{
+			int count = getCountOfSelectedDish();
+			if (count > 1)
+				count--;
+			countOfDetailDish.Text = count.ToString();
+		}
+
+		private void IncCountDish_Click(object sender, EventArgs e)
+		{
+			int count = getCountOfSelectedDish();
+			if(count < 100)
+				count++;
+			setCountOfSelectedDish(getCountOfSelectedDish() + 1);
+		}
+
+		private void setCountOfSelectedDish(int count) {
+			countOfDetailDish.Text = count.ToString();
+		}
+
+		private int getCountOfSelectedDish() {
+			return Convert.ToInt32(countOfDetailDish.Text);
+		}
+
+		/**
+		 * Ooops..
+		 * */
+		private string getSerializeOrderItems(int orderIdx) {
+			List<string> _dish = new List<string>();
+			string json = "";
+
+			foreach (var dish in orders[orderIdx].dishes)
+				_dish.Add(JsonConvert.SerializeObject(new Dictionary<int, int>() { { dish.id, dish.count } }));
+
+			if(_dish.Any())
+				json += String.Join(", ", _dish);
+			
+			return "[" + json + "]";
 		}
 	}
 	/**
@@ -664,6 +773,13 @@ namespace appProg
 		private static string host = "127.0.0.1";
 		private static string user = "mysql";
 		private static string password = "mysql";
+		private static Dictionary<string, string> tables = 
+			new Dictionary<string, string>()
+			{
+				{ "dishes",		"dish" },
+				{ "images",		"images"},
+				{ "order",      "`order`"}
+			};
 		private MySqlConnection connection;
 		/**
 		 * Class for work with response from DBResult
@@ -671,6 +787,7 @@ namespace appProg
 		public class DBResult
 		{
 			public bool success = false; // status of response
+			public bool empty = false;
 			public string error = "Неизвестная ошибка."; // default error
 			public List<List<Object>> data = new List<List<Object>>(); // main wrapper for data: rows and cols
 		}
@@ -681,7 +798,7 @@ namespace appProg
 		{
 			DB db = new DB();
 			List<string> sections = new List<string>();
-			DBResult result = db.exec("SELECT type FROM dish ORDER BY CAST(type AS CHAR)");
+			DBResult result = db.exec("SELECT type FROM " + tables["dishes"] + " ORDER BY CAST(type AS CHAR)");
 
 			if (result.success)
 			{
@@ -699,7 +816,7 @@ namespace appProg
 		{
 			DB db = new DB();
 			prewiewDish dishes = new prewiewDish();
-			DBResult result = db.exec("SELECT id, name, weight, cost FROM dish WHERE type = '" + sectionName + "';");
+			DBResult result = db.exec("SELECT id, name, weight, cost FROM " + tables["dishes"] + " WHERE type = '" + sectionName + "';");
 
 			if (result.success)
 			{
@@ -729,7 +846,7 @@ namespace appProg
 			try
 			{
 				db.connect();
-				string SQL = "SELECT content FROM images WHERE id = " + id + ";";
+				string SQL = "SELECT content FROM " + tables["images"] + " WHERE id = " + id + ";";
 				MySqlCommand query = new MySqlCommand(SQL, db.connection);
 				db.open();
 
@@ -770,7 +887,7 @@ namespace appProg
 		public static detailDish getDishByID(int id)
 		{
 			DB db = new DB();
-			DBResult result = db.exec("SELECT * FROM dish WHERE id = " + id + " LIMIT 1;");
+			DBResult result = db.exec("SELECT * FROM " + tables["dishes"] + " WHERE id = " + id + " LIMIT 1;");
 			detailDish dish = null;
 
 			if (result.success)
@@ -816,17 +933,36 @@ namespace appProg
 			return dish;
 		}
 		/**
-		 * 
+		 * Get id of last order in data base
 		 * */
 		public static int getLastOrderID() {
 			DB db = new DB();
-			DBResult result = db.exec("SELECT id FROM `order` ORDER BY id DESC LIMIT 1;");
+			DBResult result = db.exec("SELECT id FROM " + tables["order"] + " ORDER BY id DESC LIMIT 1;");
 			int id = 0;
+
 			if (result.success)
 			{
 				id = (int)result.data[0][0];
 			}
+
 			return id;
+		}
+
+		public static bool existOrderByID(int id) {
+			DB db = new DB();
+			DBResult result = db.exec("SELECT id FROM " + tables["order"] + " WHERE id = " + id + " LIMIT 1;");
+
+			return (!result.empty);
+		}
+
+		public static int insertOrder(string json) 
+		{
+			int insertID = -1;
+
+			DB db = new DB();
+			insertID = db.insert("INSERT INTO " + tables["order"] + " VALUES(NULL, DEFAULT, '" + json + "'); SELECT last_insert_id();");
+
+			return insertID;
 		}
 		/**
 		 * Create connection
@@ -885,6 +1021,27 @@ namespace appProg
 				";pwd=" + password + ";";
 			return new MySqlConnection(connectionData);
 		}
+
+		private int insert(string SQL) {
+			int insertID = -1;
+			
+			try
+			{
+				this.connect();
+				MySqlCommand query = new MySqlCommand(SQL, connection);
+				this.open();
+				insertID = Convert.ToInt32(query.ExecuteScalar());
+				MessageBox.Show(insertID.ToString());
+			}
+			catch(Exception e) {
+				Console.WriteLine(e);
+			}
+			finally {
+				this.disconnect();
+			}
+
+			return insertID;
+		}
 		/**
 		 * Main wrapper for work with data
 		 * Get data to DBResult object from data base
@@ -918,6 +1075,7 @@ namespace appProg
 				else
 				{
 					result.error = "По запросу получено 0 записей.";
+					result.empty = true;
 				}
 				this.disconnect();
 			}
