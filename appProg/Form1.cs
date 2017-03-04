@@ -1,4 +1,15 @@
-﻿using appProg.Properties;
+﻿/**
+ * Abramov Anton (c) 2017
+ * abramovanton@ya.ru
+ * 
+ * Application for menu of cafe
+ * Features:
+ * - Show menu
+ * - Show detail dish
+ * - Create new order
+ * 
+ * */
+ using appProg.Properties;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
@@ -12,24 +23,30 @@ namespace appProg
 {
 	public partial class Form1 : Form
 	{
-		private List<string> menuSections;
-		private DataGridView[] menuTables;
-		public static Form detailImageWindow;
+		private List<string> menuSections; // tabs of menu
+		private DataGridView[] menuTables; // tables of menu
+
+		private detailDish selectedDish;
+
+		private List<orderDish> orders = new List<orderDish>(); // opened orders
+
+		public static Form detailImageWindow; // window for view detail image of dish
 
 		int height = Screen.PrimaryScreen.Bounds.Height;
 		int width = Screen.PrimaryScreen.Bounds.Width;
 
+		/**
+		 * Constructor of main window
+		 * */
 		public Form1()
 		{
 			InitializeComponent();
-
 			/**
 			 * Form settings
 			 * */
-
 			// left part window = cafe's menu
 			this.menu.Width = width / 2 - 60;
-			this.menu.Height = height - 40 - 20;
+			this.menu.Height = height - 60;
 			this.menu.Location = new Point(
 				20,
 				40
@@ -43,31 +60,49 @@ namespace appProg
 
 			//detail dish wrapper
 			this.dishDetail.Width = width / 2 - 30;
-			this.dishDetail.Height = height / 2;
+			this.dishDetail.Height = height / 2 - 40;
 			this.dishDetail.Location = new Point(
 				width / 2,
 				40
 			);
 
+			//order wrapper
+			this.order.Width = width / 2 - 30;
+			this.order.Height = height / 2 - 60;
+			this.order.Location = new Point(
+				width / 2,
+				height / 2 + 40
+			);
+
+			//order buttons
+			this.btnCreateOrder.Location = new Point(
+				width / 2,
+				height / 2 + 10
+			);
+			this.btnSaveOrder.Location = new Point(
+				btnCreateOrder.Bounds.Right + 10,
+				height / 2 + 10
+			);
+			this.btnRemoveOrder.Location = new Point(
+				btnSaveOrder.Bounds.Right + 10,
+				height / 2 + 10
+			);
+			this.btnCloseOrder.Location = new Point(
+				btnRemoveOrder.Bounds.Right + 10,
+				height / 2 + 10
+			);
+
 			//TODO set properties for search
-			/**
-			 * Form settings
-			 * */
 
 			/**
 			 * Get data from DB
 			 * */
-
 			menuSections = DB.getMenuSections(); // get all exist sections
 			createTabs(menuSections); // create tabs by found sections
 			
 			loadTabDishes(0); // fill data to first tab
-			DB.getImageByID(1);
-			/**
-			 * Get data from DB
-			 * */
-		}
 
+		}
 		/**
 		 * On load main window
 		 * */
@@ -81,7 +116,6 @@ namespace appProg
 			Width = Screen.PrimaryScreen.Bounds.Width;
 			Height = Screen.PrimaryScreen.Bounds.Height;
 		}
-
 		/**
 		 * Func(wrapper) for load data from DB and fill to menu
 		 * */
@@ -92,7 +126,6 @@ namespace appProg
 			foreach (prewiewDish dish in dishes)
 				menuTables[index].Rows.Add(new object[] { dish.id, dish.name, dish.weight, dish.cost });
 		}
-
 		/**
 		 * Func for create tab on menu
 		 * */
@@ -138,7 +171,6 @@ namespace appProg
 				this.menu.TabPages.Add(myTabPage);
 			}
 		}
-
 		/**
 		 * Button for close application
 		 * */
@@ -146,7 +178,6 @@ namespace appProg
 		{
 			this.Close();
 		}
-
 		/**
 		 * Select dish in menu(dish list)
 		 * */
@@ -159,7 +190,6 @@ namespace appProg
 				showDetailDish(id);
 			}
 		}
-
 		/**
 		 * Load data about dish by ID and fill to detail dish block
 		 * */
@@ -279,8 +309,13 @@ namespace appProg
 			this.dishDetail.TabPages.Add(mainTab);
 			if(imageTab != null)
 				this.dishDetail.TabPages.Add(imageTab);
+			if (selectedDish == null)
+			{
+				btnAddToOrder.Enabled = true;
+				countOfDetailDish.Enabled = true;
+			}
+			selectedDish = dish;
 		}
-
 		/**
 		 * Change tab index in menu
 		 * */
@@ -289,7 +324,6 @@ namespace appProg
 			int tab = this.menu.SelectedIndex;
 			loadTabDishes(tab);
 		}
-
 		/**
 		 * Show full size images of dishes
 		 * */
@@ -316,8 +350,180 @@ namespace appProg
 				detailImageWindow.Show();
 			}
 		}
-	}
+		private void createOrder_Click(object sender, EventArgs e)
+		{
+			createOrder();
+			loadOrdersTabs();
+		}
 
+		private void saveOrder_Click(object sender, EventArgs e)
+		{
+			
+		}
+
+		private void removeOrder_Click(object sender, EventArgs e)
+		{
+
+			order.TabPages.Clear();
+		}
+
+		private void closeOrder_Click(object sender, EventArgs e)
+		{
+			int index = order.SelectedIndex;
+			if(index != -1) {
+				orders.RemoveAt(index);
+				loadOrdersTabs();
+			}
+		}
+
+		private int createOrder(orderDish order = null) {
+			int id = orders.Count;
+			if (order == null) {
+				order = new orderDish();
+				order.name = "Новый заказ";
+				order.id = DB.getLastOrderID() + 1;
+			}
+		
+			orders.Add(order);
+			return id;
+		}
+
+		private int findOrderDishIdxByDishID(int orderIdx, int id) {
+			int idx = -1;
+			
+			if(orderIdx != -1) {
+				int count = orders[orderIdx].dishes.Count;
+				for (int i = 0; i < count; i++){
+					if (orders[orderIdx].dishes[i].id == id){
+						idx = i;
+						break;
+					}
+				}
+			}
+
+			return idx;
+		}
+
+		private int findOrderIdxByOrderID(int id) {
+			int idx = -1;
+			int count = orders.Count;
+			
+			for (int i = 0; i < count; i++){
+				if (orders[i].id == id){
+					idx = i;
+					break;
+				}
+			}
+		
+			return idx;
+		}
+
+		private int findOrderIdxByDishID(int id){
+			int idx = -1;
+			int countOrder = orders.Count;
+		
+			for (int i = 0; i < countOrder; i++){
+				int countDishes = orders[i].dishes.Count;
+				for (int j = 0; j < countDishes; j++){
+					if (orders[i].dishes[j].id == id){
+						idx = i;
+						break;
+					}
+				}
+			}
+
+			return idx;
+		}
+
+		private void addDishToOrder(int id, string name, float cost, int count, int orderIdx = -1) {
+			if(orderIdx == -1) {
+				orderIdx = createOrder();
+				orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
+			}else {
+				int dishIdx = findOrderDishIdxByDishID(orderIdx, id);
+				if (dishIdx == -1)
+					orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
+				else
+					orders[orderIdx].dishes[dishIdx].count += count;
+			}
+			
+			loadOrdersTabs();
+		}
+
+		private void loadOrdersTabs() {
+			order.TabPages.Clear();
+			int menuHeight = this.order.Height;
+			int menuWidth = this.order.Width;
+			int countOrders = orders.Count();
+			DataGridView[] orderTables = new DataGridView[countOrders];
+
+			menuColumn[] columns = {
+				new menuColumn { name = "id", header = "ИД", width = menuWidth / 100 * 5 },
+				new menuColumn { name = "name", header = "Название", width = menuWidth / 100 * 65},
+				new menuColumn { name = "cost", header = "Стоимость, руб.", width = menuWidth / 100 * 15 },
+				new menuColumn { name = "count", header = "Количество, шт.", width = menuWidth / 100 * 20 },
+			};
+				int countColumns = columns.Count();
+
+			for (int i = 0; i < countOrders; i++)
+			{
+				TabPage tabPage = new TabPage(orders[i].name);
+				orderTables[i] = new DataGridView();
+				orderTables[i].Left = orderTables[i].Top = 0;
+				orderTables[i].Height = menuHeight;
+				orderTables[i].Width = menuWidth;
+				orderTables[i].RowHeadersVisible = false;
+				orderTables[i].ScrollBars = ScrollBars.Vertical;
+				orderTables[i].ReadOnly = true;
+				orderTables[i].AllowUserToAddRows = false;
+				orderTables[i].CellClick += new DataGridViewCellEventHandler(this.menuTableCell_Click);
+
+				for (int j = 0; j < countColumns; j++)
+				{
+					DataGridViewColumn column = new DataGridViewTextBoxColumn();
+					column.Width = columns[j].width;
+					column.Name = columns[j].name;
+					column.HeaderText = columns[j].header;
+					orderTables[i].Columns.Add(column);
+				}
+
+				tabPage.Controls.Add(orderTables[i]);
+				this.order.TabPages.Add(tabPage);
+			}
+			//TODO дописать
+			var index = order.SelectedIndex;
+			if(orders.Any()) {
+				foreach (var dish in orders[index].dishes)
+				{
+					orderTables[index].Rows.Add(new object[] { dish.id, dish.name, dish.cost, dish.count });
+				}
+			}
+			
+		}
+		private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+		{
+			if (e.ColumnIndex == 1) //
+			{
+				int i;
+
+				if (!int.TryParse(Convert.ToString(e.FormattedValue), out i))
+				{
+					e.Cancel = true;
+				}
+				// the input is numeric 
+				else
+				{
+			
+				}
+			}
+		}
+		private void addToOrder_Click(object sender, EventArgs e)
+		{
+			int count = Convert.ToInt32(countOfDetailDish.Text);
+			MessageBox.Show(order.SelectedIndex.ToString());
+			addDishToOrder(selectedDish.id, selectedDish.name, selectedDish.cost, count, order.SelectedIndex);
+		}
+	}
 	/**
 	 * Gallery images 
 	 * */
@@ -352,8 +558,6 @@ namespace appProg
 				_width,
 				_height
 			);
-			this.ForeColor = Color.DarkRed;
-			this.BackColor = Color.Black;
 			this.AutoScrollMinSize = new Size(_width, _height); // for show scroll bars if need
 
 			this.CreateGallery(images);
@@ -411,7 +615,6 @@ namespace appProg
 			}
 		}
 	}
-
 	/**
 	 * Other functions for magic
 	 * */
@@ -435,7 +638,6 @@ namespace appProg
 		}
 
 	}
-
 	/**
 	 * Easy way for processing exceptions
 	 * */
@@ -447,7 +649,6 @@ namespace appProg
 
 		}
 	}
-
 	/**
 	 * Class for work with Mysql Data Base;
 	 * 
@@ -615,6 +816,19 @@ namespace appProg
 			return dish;
 		}
 		/**
+		 * 
+		 * */
+		public static int getLastOrderID() {
+			DB db = new DB();
+			DBResult result = db.exec("SELECT id FROM `order` ORDER BY id DESC LIMIT 1;");
+			int id = 0;
+			if (result.success)
+			{
+				id = (int)result.data[0][0];
+			}
+			return id;
+		}
+		/**
 		 * Create connection
 		 * */
 		public void connect()
@@ -723,7 +937,6 @@ namespace appProg
 			return result;
 		}
 	}
-
 	/**
 	 * Dish class for detail view
 	 * */
@@ -740,7 +953,6 @@ namespace appProg
 		public float weight;
 		public float cost;
 	};
-
 	/**
 	 * Dish class for preview
 	 * */
@@ -751,7 +963,23 @@ namespace appProg
 		public float weight;
 		public float cost;
 	}
+	/**
+	 * Dish class for view dish in list of order
+	 * */
+	public class orderDish {
+		public int id;
+		public string name;
+		public float cost;
+		public float weight;
+		public List<dishInOrder> dishes = new List<dishInOrder>();
+	}
 
+	public class dishInOrder{
+		public int id;
+		public string name;
+		public float cost;
+		public int count; 
+	}
 	/**
 	 * Class-wrapper for tabs control
 	 * */
