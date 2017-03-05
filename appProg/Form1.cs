@@ -31,6 +31,7 @@ namespace appProg
 		private List<orderDish> orders = new List<orderDish>(); // opened orders
 
 		public static Form detailImageWindow; // window for view detail image of dish
+		public static Form openOrderDialog; 
 
 		int height = Screen.PrimaryScreen.Bounds.Height;
 		int width = Screen.PrimaryScreen.Bounds.Width;
@@ -131,7 +132,7 @@ namespace appProg
 			/**
 			 * Hide windows's borders and resize to fullscreen
 			 * */
-			FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+			FormBorderStyle = FormBorderStyle.None;
 			Left = Top = 0;
 			Width = Screen.PrimaryScreen.Bounds.Width;
 			Height = Screen.PrimaryScreen.Bounds.Height;
@@ -383,6 +384,13 @@ namespace appProg
 			loadOrdersTabs();
 			order.SelectedIndex = idx;
 		}
+		private void openOrder(int id) {
+			orderDish order = new orderDish();
+			order = DB.getOrderByID(id);
+			if(order != null)
+				createOrder(order);
+			//TODO write logic
+		}
 		//create(append) order in global MainWindow var "order" [optional by exist orderDish object]
 		private int createOrder(orderDish order = null)
 		{
@@ -428,8 +436,19 @@ namespace appProg
 
 		private void removeOrder_Click(object sender, EventArgs e)
 		{
-			
-			order.TabPages.Clear();
+			int index = order.SelectedIndex;
+			if(index > -1 && orders[index] != null) {
+				if (orders[index].name == "Новый заказ")
+					orders.RemoveAt(index);
+				else {
+					int id = orders[index].id;
+					if(DB.existOrderByID(id))
+						
+					orders.RemoveAt(index);
+				}
+				order.TabPages.Clear();
+				loadOrdersTabs();
+			}
 		}
 
 		private void closeOrder_Click(object sender, EventArgs e)
@@ -629,8 +648,58 @@ namespace appProg
 
 			if(_dish.Any())
 				json += String.Join(", ", _dish);
-			
+			/*
+				List<Foo> arr = new List<Foo>(dict.Values);
+				Foo[] arr = (new List<Foo>(dict.Values)).ToArray();
+			 */
 			return "[" + json + "]";
+		}
+
+		private void openOrder_Click(object sender, EventArgs e)
+		{
+			openOrderDialog = new Form();
+			TextBox input = new TextBox();
+			Button OK = new Button();
+			Button Cancel = new Button();
+
+			int wh = 200;
+			openOrderDialog.Width = openOrderDialog.Height = wh;
+			openOrderDialog.Text = "Открыть заказ по номеру";
+			openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
+			openOrderDialog.ControlBox = false;
+
+			OK.Width = Cancel.Width = 60;
+			OK.Location = new Point(
+				wh / 2 - OK.Width - 10,
+				wh / 2
+			);
+			OK.Click += (s, ev) => {
+				int id = Convert.ToInt32(input.Text);
+				if (DB.existOrderByID(id))
+					openOrder(id);
+				//TODO write logic
+				openOrderDialog.Close();
+			};
+			OK.Text = "Открыть";
+
+			Cancel.DialogResult = DialogResult.Cancel;
+			Cancel.Location = new Point(
+				wh / 2 + 10,
+				wh / 2
+			);
+			Cancel.Click += (s, ev) => {
+				openOrderDialog.Close();
+			};
+			Cancel.Text = "Отмена";
+
+			input.Location = new Point(
+				wh / 2 - input.Width / 2,
+				wh / 2 - input.Height * 2
+			);
+			input.KeyPress += Util.keyPress_onlyInt;
+
+			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input });
+			openOrderDialog.Show();
 		}
 	}
 	/**
@@ -746,6 +815,20 @@ namespace appProg
 			}
 		}
 
+		public static void keyPress_onlyFloat(object sender, KeyPressEventArgs e)
+		{
+			if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+				e.Handled = true;
+
+			if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+				e.Handled = true;
+		}
+
+		public static void keyPress_onlyInt(object sender, KeyPressEventArgs e)
+		{
+			if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+				e.Handled = true;
+		}
 	}
 	/**
 	 * Easy way for processing exceptions
@@ -955,14 +1038,79 @@ namespace appProg
 			return (!result.empty);
 		}
 
+		public static bool removeOrderByID(int id)
+		{
+			DB db = new DB();
+			bool result = db.delete("DELETE FROM " + tables["order"] + " WHERE id = " + id + " LIMIT 1;");
+
+			return result;
+		}
+
 		public static int insertOrder(string json) 
 		{
 			int insertID = -1;
 
 			DB db = new DB();
-			insertID = db.insert("INSERT INTO " + tables["order"] + " VALUES(NULL, DEFAULT, '" + json + "'); SELECT last_insert_id();");
+			insertID = db.insert("INSERT INTO " + tables["order"] + " VALUES(NULL, DEFAULT, '" + json + "');");
 
 			return insertID;
+		}
+		public static bool updateOrder(int id, string json)
+		{
+			DB db = new DB();
+			bool success = db.update("UPDATE `order` set dishes = '" + json + "', date = DEFAULT WHERE id = " + id + ";");
+
+			return success;
+		}
+
+		public static orderDish getOrderByID(int id) {
+			DB db = new DB();
+			DBResult result = db.exec("SELECT * FROM " + tables["order"] + " WHERE id = " + id + " LIMIT 1;");
+			orderDish order = null;
+
+			if (result.success)
+			{
+				var row = result.data[0];
+
+				var name = "Заказ №" + id;
+				var date = row[1].ToString();
+				var dishes = new List<dishInOrder>();
+				Console.WriteLine(row[2]);
+				if (row[2] != DBNull.Value)
+				{
+					string json = row[2].ToString();
+					if(json != "[]") {
+						try
+						{
+							var _dishes = JsonConvert.DeserializeObject<List<Dictionary<int, int>>>(row[2].ToString());
+							foreach (var _dish in _dishes)
+							{
+								dishInOrder dish = new dishInOrder();
+								dish.id = _dish.Keys.ElementAt(0);
+								dish.count = _dish.Values.ElementAt(0);
+								dishes.Add(dish);
+							}
+						}
+						catch (JsonException e)
+						{
+							Console.WriteLine(e);
+							MessageBox.Show("Не удалось получить данные о изображениях блюда", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}
+					}
+					else {
+						//TODO write logic
+					}
+				}
+
+				order = new orderDish
+				{
+					id = id,
+					name = name,
+					date = date,
+					dishes = dishes
+				};
+			}
+			return order;
 		}
 		/**
 		 * Create connection
@@ -1028,7 +1176,7 @@ namespace appProg
 			try
 			{
 				this.connect();
-				MySqlCommand query = new MySqlCommand(SQL, connection);
+				MySqlCommand query = new MySqlCommand(SQL + " SELECT last_insert_id();", connection);
 				this.open();
 				insertID = Convert.ToInt32(query.ExecuteScalar());
 				MessageBox.Show(insertID.ToString());
@@ -1041,6 +1189,53 @@ namespace appProg
 			}
 
 			return insertID;
+		}
+		private bool update(string SQL)
+		{
+			bool success = false;
+			try
+			{
+				this.connect();
+				MySqlCommand query = new MySqlCommand(SQL, connection);
+				this.open();
+				int count = query.ExecuteNonQuery();
+				if (count > 0)
+					success = true;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
+			finally
+			{
+				this.disconnect();
+			}
+
+			return success;
+		}
+		private bool delete(string SQL) 
+		{
+			bool success = false;
+
+			try
+			{
+				this.connect();
+				MySqlCommand query = new MySqlCommand(SQL, connection);
+				this.open();
+				int count = query.ExecuteNonQuery();
+				if (count > 0)
+					success = true;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
+			finally
+			{
+				this.disconnect();
+			}
+
+			return success;
 		}
 		/**
 		 * Main wrapper for work with data
@@ -1127,6 +1322,7 @@ namespace appProg
 	public class orderDish {
 		public int id;
 		public string name;
+		public string date;
 		public float cost;
 		public float weight;
 		public List<dishInOrder> dishes = new List<dishInOrder>();
@@ -1136,7 +1332,7 @@ namespace appProg
 		public int id;
 		public string name;
 		public float cost;
-		public int count; 
+		public int count;
 	}
 	/**
 	 * Class-wrapper for tabs control

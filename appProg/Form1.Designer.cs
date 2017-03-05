@@ -43,6 +43,7 @@
 			this.countOfDetailDish = new System.Windows.Forms.TextBox();
 			this.btnIncCountDish = new System.Windows.Forms.Button();
 			this.btnDecCountDish = new System.Windows.Forms.Button();
+			this.btnOpenOrder = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnAppClose
@@ -107,9 +108,9 @@
 			// 
 			// btnCreateOrder
 			// 
-			this.btnCreateOrder.Location = new System.Drawing.Point(472, 334);
+			this.btnCreateOrder.Location = new System.Drawing.Point(585, 334);
 			this.btnCreateOrder.Name = "btnCreateOrder";
-			this.btnCreateOrder.Size = new System.Drawing.Size(100, 23);
+			this.btnCreateOrder.Size = new System.Drawing.Size(90, 23);
 			this.btnCreateOrder.TabIndex = 8;
 			this.btnCreateOrder.Text = "Новый заказ";
 			this.btnCreateOrder.UseVisualStyleBackColor = true;
@@ -117,9 +118,9 @@
 			// 
 			// btnSaveOrder
 			// 
-			this.btnSaveOrder.Location = new System.Drawing.Point(585, 335);
+			this.btnSaveOrder.Location = new System.Drawing.Point(694, 334);
 			this.btnSaveOrder.Name = "btnSaveOrder";
-			this.btnSaveOrder.Size = new System.Drawing.Size(100, 23);
+			this.btnSaveOrder.Size = new System.Drawing.Size(80, 23);
 			this.btnSaveOrder.TabIndex = 9;
 			this.btnSaveOrder.Text = "Сохранить";
 			this.btnSaveOrder.UseVisualStyleBackColor = true;
@@ -127,9 +128,9 @@
 			// 
 			// btnRemoveOrder
 			// 
-			this.btnRemoveOrder.Location = new System.Drawing.Point(698, 335);
+			this.btnRemoveOrder.Location = new System.Drawing.Point(780, 335);
 			this.btnRemoveOrder.Name = "btnRemoveOrder";
-			this.btnRemoveOrder.Size = new System.Drawing.Size(100, 23);
+			this.btnRemoveOrder.Size = new System.Drawing.Size(60, 23);
 			this.btnRemoveOrder.TabIndex = 10;
 			this.btnRemoveOrder.Text = "Удалить";
 			this.btnRemoveOrder.UseVisualStyleBackColor = true;
@@ -137,9 +138,9 @@
 			// 
 			// btnCloseOrder
 			// 
-			this.btnCloseOrder.Location = new System.Drawing.Point(806, 335);
+			this.btnCloseOrder.Location = new System.Drawing.Point(846, 334);
 			this.btnCloseOrder.Name = "btnCloseOrder";
-			this.btnCloseOrder.Size = new System.Drawing.Size(100, 23);
+			this.btnCloseOrder.Size = new System.Drawing.Size(60, 23);
 			this.btnCloseOrder.TabIndex = 11;
 			this.btnCloseOrder.Text = "Закрыть";
 			this.btnCloseOrder.UseVisualStyleBackColor = true;
@@ -188,11 +189,22 @@
 			this.btnDecCountDish.UseVisualStyleBackColor = true;
 			this.btnDecCountDish.Click += new System.EventHandler(this.DecCountDish_Click);
 			// 
+			// btnOpenOrder
+			// 
+			this.btnOpenOrder.Location = new System.Drawing.Point(472, 334);
+			this.btnOpenOrder.Name = "btnOpenOrder";
+			this.btnOpenOrder.Size = new System.Drawing.Size(100, 23);
+			this.btnOpenOrder.TabIndex = 16;
+			this.btnOpenOrder.Text = "Открыть заказ";
+			this.btnOpenOrder.UseVisualStyleBackColor = true;
+			this.btnOpenOrder.Click += new System.EventHandler(this.openOrder_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(918, 656);
+			this.Controls.Add(this.btnOpenOrder);
 			this.Controls.Add(this.btnDecCountDish);
 			this.Controls.Add(this.btnIncCountDish);
 			this.Controls.Add(this.countOfDetailDish);
@@ -236,6 +248,7 @@
 		private System.Windows.Forms.TextBox countOfDetailDish;
 		private System.Windows.Forms.Button btnIncCountDish;
 		private System.Windows.Forms.Button btnDecCountDish;
+		private System.Windows.Forms.Button btnOpenOrder;
 	}
 }
 
