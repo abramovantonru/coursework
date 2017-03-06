@@ -7,7 +7,9 @@
  * - Show menu
  * - Show detail dish
  * - Create new order
- * 
+ * - Load exist order
+ * - Save order
+ * - Remove order
  * */
 using appProg.Properties;
 using MySql.Data.MySqlClient;
@@ -29,9 +31,11 @@ namespace appProg
 		private detailDish selectedDish;
 
 		private List<orderDish> orders = new List<orderDish>(); // opened orders
+		DataGridView[] orderTables;
 
 		public static Form detailImageWindow; // window for view detail image of dish
-		public static Form openOrderDialog; 
+		public static Form openOrderDialog;
+		public static Form removeOrderDialog;
 
 		int height = Screen.PrimaryScreen.Bounds.Height;
 		int width = Screen.PrimaryScreen.Bounds.Width;
@@ -96,8 +100,12 @@ namespace appProg
 			);
 
 			//order buttons
-			this.btnCreateOrder.Location = new Point(
+			this.btnOpenOrder.Location = new Point(
 				width / 2,
+				height / 2 + 10
+			);
+			this.btnCreateOrder.Location = new Point(
+				btnOpenOrder.Bounds.Right + 10,
 				height / 2 + 10
 			);
 			this.btnSaveOrder.Location = new Point(
@@ -208,7 +216,9 @@ namespace appProg
 			if (row > -1) {
 				var tab = menu.SelectedIndex;
 				int id = (int)menuTables[tab].Rows[row].Cells[0].Value;
-				showDetailDish(id);
+				if (id > 0)
+					if(selectedDish == null || selectedDish.id != id)
+						showDetailDish(id);
 			}
 		}
 		/**
@@ -384,13 +394,6 @@ namespace appProg
 			loadOrdersTabs();
 			order.SelectedIndex = idx;
 		}
-		private void openOrder(int id) {
-			orderDish order = new orderDish();
-			order = DB.getOrderByID(id);
-			if(order != null)
-				createOrder(order);
-			//TODO write logic
-		}
 		//create(append) order in global MainWindow var "order" [optional by exist orderDish object]
 		private int createOrder(orderDish order = null)
 		{
@@ -410,8 +413,16 @@ namespace appProg
 		{
 			int index = order.SelectedIndex;
 			if (index > -1) {
-				orders[index].name = "Заказ №" + saveOrder(index);
-				loadOrdersTabs();
+				int id = saveOrder(index);
+				if (id == 0) 
+					MessageBox.Show("Заказ успешно сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				else if(id == -1)
+					MessageBox.Show("Не удалось сохранить заказ!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				else if(id > -1) {
+					MessageBox.Show("Заказ успешно сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					orders[index].name = "Заказ №" + id;
+					loadOrdersTabs();
+				}
 			}
 		}
 		//save order from global MainWindow var "order" by index to data base
@@ -421,14 +432,15 @@ namespace appProg
 
 			if(orderID != -1) {
 				string json = getSerializeOrderItems(index);
-				if(json != "[]") {
-					/*if (DB.existOrderByID(orderID))
-						id = DB.updateOrder(json);
-					else
-						id = DB.insertOrder(json);*/
+				if(json != "[]")
 					if (!DB.existOrderByID(orderID))
 						id = DB.insertOrder(json);
-				}
+					else
+						if (DB.updateOrder(orderID, json))
+							id = 0;
+						else
+							id = -1;
+				else MessageBox.Show("Невозможно сохранить пустой заказ!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 
 			return id;
@@ -442,9 +454,10 @@ namespace appProg
 					orders.RemoveAt(index);
 				else {
 					int id = orders[index].id;
-					if(DB.existOrderByID(id))
-						
-					orders.RemoveAt(index);
+					if (DB.existOrderByID(id))
+						showRemoveOrderDialog(id);
+					else
+						MessageBox.Show("Заказ с данным номером (" + id + ") не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
 				}
 				order.TabPages.Clear();
 				loadOrdersTabs();
@@ -514,56 +527,67 @@ namespace appProg
 
 		private int orderIDbyIdx(int idx) {
 			int id = -1;
-			int count = orders.Count;
 
-			if (idx < count && orders[idx] != null)
+			if (idx < orders.Count && orders[idx] != null)
 				id = orders[idx].id;
 
-			return idx;
+			return id;
 		}
 
 		private void addDishToOrder(int id, string name, float cost, int count, int orderIdx = -1) {
 			if(orderIdx == -1) {
 				orderIdx = createOrder();
 				orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
+				loadOrdersTabs();
 			}else {
 				int dishIdx = findOrderDishIdxByDishID(orderIdx, id);
 				if (dishIdx == -1)
 					orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
 				else
 					orders[orderIdx].dishes[dishIdx].count += count;
+				int selectedIdx = order.SelectedIndex;
+				loadOrderTabDishes(selectedIdx);
 			}
-			
-			loadOrdersTabs();
+		}
+
+		private void loadOrderTabDishes(int idx){
+			if (idx != -1 && orders.Any())
+			{
+				orderTables[idx].Rows.Clear();
+				foreach (var dish in orders[idx].dishes)
+				{
+					orderTables[idx].Rows.Add(new object[] { dish.id, dish.name, dish.cost, dish.count });
+				}
+			}
 		}
 
 		private void loadOrdersTabs() {
 			order.TabPages.Clear();
-			int menuHeight = this.order.Height;
-			int menuWidth = this.order.Width;
-			int countOrders = orders.Count();
-			DataGridView[] orderTables = new DataGridView[countOrders];
+			int orderHeight = this.order.Height;
+			int orderWidth = this.order.Width;
+			int countOrders = orders.Count;
+			orderTables = new DataGridView[countOrders];
 
 			menuColumn[] columns = {
-				new menuColumn { name = "id", header = "ИД", width = menuWidth / 100 * 5 },
-				new menuColumn { name = "name", header = "Название", width = menuWidth / 100 * 65},
-				new menuColumn { name = "cost", header = "Стоимость, руб.", width = menuWidth / 100 * 15 },
-				new menuColumn { name = "count", header = "Количество, шт.", width = menuWidth / 100 * 20 },
+				new menuColumn { name = "id", header = "ИД", width = orderWidth / 100 * 5 },
+				new menuColumn { name = "name", header = "Название", width = orderWidth / 100 * 65},
+				new menuColumn { name = "cost", header = "Стоимость, руб.", width = orderWidth / 100 * 15 },
+				new menuColumn { name = "count", header = "Количество, шт.", width = orderWidth / 100 * 20 },
 			};
-				int countColumns = columns.Count();
+			int countColumns = columns.Count();
 
 			for (int i = 0; i < countOrders; i++)
 			{
 				TabPage tabPage = new TabPage(orders[i].name);
 				orderTables[i] = new DataGridView();
 				orderTables[i].Left = orderTables[i].Top = 0;
-				orderTables[i].Height = menuHeight;
-				orderTables[i].Width = menuWidth;
+				orderTables[i].Height = orderHeight;
+				orderTables[i].Width = orderWidth;
 				orderTables[i].RowHeadersVisible = false;
 				orderTables[i].ScrollBars = ScrollBars.Vertical;
 				orderTables[i].ReadOnly = true;
 				orderTables[i].AllowUserToAddRows = false;
-				//orderTables[i].CellClick += new DataGridViewCellEventHandler(this.menuTableCell_Click);
+				orderTables[i].CellClick += new DataGridViewCellEventHandler(this.orderTableCell_Click);
 
 				for (int j = 0; j < countColumns; j++)
 				{
@@ -577,32 +601,24 @@ namespace appProg
 				tabPage.Controls.Add(orderTables[i]);
 				this.order.TabPages.Add(tabPage);
 			}
-			//TODO дописать
-			var index = order.SelectedIndex;
-			if(orders.Any()) {
-				foreach (var dish in orders[index].dishes)
-				{
-					orderTables[index].Rows.Add(new object[] { dish.id, dish.name, dish.cost, dish.count });
-				}
-			}
-			
-		}
-		
-		private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
-		{
-			if (e.ColumnIndex == 1) //
-			{
-				int i;
 
-				if (!int.TryParse(Convert.ToString(e.FormattedValue), out i))
-				{
-					e.Cancel = true;
+			if(orders.Any()) {
+				for(int i = 0; i < countOrders; i++) {
+					loadOrderTabDishes(i);
 				}
-				// the input is numeric 
-				else
-				{
-			
-				}
+			}			
+		}
+
+		private void orderTableCell_Click(object sender, DataGridViewCellEventArgs e)
+		{
+			int row = e.RowIndex;
+			if (row > -1)
+			{
+				var tab = order.SelectedIndex;
+				int id = (int)orderTables[tab].Rows[row].Cells[0].Value;
+				if (id > 0)
+					if (selectedDish == null || selectedDish.id != id)
+						showDetailDish(id);
 			}
 		}
 		
@@ -661,24 +677,44 @@ namespace appProg
 			TextBox input = new TextBox();
 			Button OK = new Button();
 			Button Cancel = new Button();
+			Label info = new Label();
 
 			int wh = 200;
 			openOrderDialog.Width = openOrderDialog.Height = wh;
 			openOrderDialog.Text = "Открыть заказ по номеру";
 			openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
 			openOrderDialog.ControlBox = false;
+			openOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+			info.Text = "Введите номер заказа";
+			info.Width = wh;
+			info.Location = new Point(
+				wh / 2 - info.PreferredWidth / 2,
+				info.Height
+			);
 
 			OK.Width = Cancel.Width = 60;
 			OK.Location = new Point(
 				wh / 2 - OK.Width - 10,
 				wh / 2
 			);
+			//event for ok button
 			OK.Click += (s, ev) => {
 				int id = Convert.ToInt32(input.Text);
-				if (DB.existOrderByID(id))
-					openOrder(id);
-				//TODO write logic
-				openOrderDialog.Close();
+				if (DB.existOrderByID(id)) {
+					if(findOrderIdxByOrderID(id) == -1) {
+						int selectedIdx = openOrder(id);
+						openOrderDialog.Close();
+						loadOrdersTabs();
+						if (selectedIdx != -1)
+							order.SelectedIndex = selectedIdx;
+					}else {
+						MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
+				}
+				else {
+					MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			};
 			OK.Text = "Открыть";
 
@@ -687,6 +723,7 @@ namespace appProg
 				wh / 2 + 10,
 				wh / 2
 			);
+			//event for cancel button
 			Cancel.Click += (s, ev) => {
 				openOrderDialog.Close();
 			};
@@ -698,8 +735,81 @@ namespace appProg
 			);
 			input.KeyPress += Util.keyPress_onlyInt;
 
-			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input });
+			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
 			openOrderDialog.Show();
+		}
+		private int openOrder(int id)
+		{
+			orderDish order = new orderDish();
+			order = DB.getOrderByID(id);
+			if (order != null) {
+				createOrder(order);
+				return findOrderIdxByOrderID(id);
+			}
+			else {
+				MessageBox.Show("Неудалось получить информацию о заказе!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			return -1;
+		}
+
+		private void showRemoveOrderDialog(int id) {
+			removeOrderDialog = new Form();
+			TextBox input = new TextBox();
+			Button OK = new Button();
+			Button Cancel = new Button();
+			Label info = new Label();
+
+			int w = 300;
+			int h = 200;
+			removeOrderDialog.Width = w;
+			removeOrderDialog.Height = h;
+			removeOrderDialog.Text = "Удаление заказа №" + id;
+			removeOrderDialog.StartPosition = FormStartPosition.CenterScreen;
+			removeOrderDialog.ControlBox = false;
+			removeOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+			info.Text = "Вы уверены, что хотите удалить заказ №" + id + " ?";
+			info.Width = w;
+			info.Location = new Point(
+				w / 2 - info.PreferredWidth / 2,
+				h /2 - info.Height * 2
+			);
+
+			OK.Width = Cancel.Width = 60;
+			OK.Location = new Point(
+				w / 2 - OK.Width - 10,
+				h / 2
+			);
+			//event for ok button
+			OK.Click += (s, ev) => {
+				int idx = findOrderIdxByOrderID(id);
+				if (idx != -1)
+				{
+					if (DB.removeOrderByID(id)) {
+						orders.RemoveAt(idx);
+						MessageBox.Show("Заказ с данным номером (" + id + ") успешно удален.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+						loadOrdersTabs();
+					}	
+					else MessageBox.Show("Не удалось удалить заказ №" + id + "!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				}
+				else MessageBox.Show("Заказ с данным номером (" + id + ") не найден.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				removeOrderDialog.Close();
+			};
+			OK.Text = "Удалить";
+
+			Cancel.DialogResult = DialogResult.Cancel;
+			Cancel.Location = new Point(
+				w / 2 + 10,
+				h / 2
+			);
+			//event for cancel button
+			Cancel.Click += (s, ev) => {
+				removeOrderDialog.Close();
+			};
+			Cancel.Text = "Отмена";
+
+			removeOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, info });
+			removeOrderDialog.Show();
 		}
 	}
 	/**
@@ -1058,7 +1168,7 @@ namespace appProg
 		public static bool updateOrder(int id, string json)
 		{
 			DB db = new DB();
-			bool success = db.update("UPDATE `order` set dishes = '" + json + "', date = DEFAULT WHERE id = " + id + ";");
+			bool success = db.update("UPDATE " + tables["order"] + " set dishes = '" + json + "', date = DEFAULT WHERE id = " + id + ";");
 
 			return success;
 		}
@@ -1088,7 +1198,12 @@ namespace appProg
 								dishInOrder dish = new dishInOrder();
 								dish.id = _dish.Keys.ElementAt(0);
 								dish.count = _dish.Values.ElementAt(0);
-								dishes.Add(dish);
+								detailDish __dish = DB.getDishByID(dish.id);
+								if(__dish != null) {
+									dish.name = __dish.name;
+									dish.cost = __dish.cost;
+									dishes.Add(dish);
+								}
 							}
 						}
 						catch (JsonException e)
@@ -1179,7 +1294,6 @@ namespace appProg
 				MySqlCommand query = new MySqlCommand(SQL + " SELECT last_insert_id();", connection);
 				this.open();
 				insertID = Convert.ToInt32(query.ExecuteScalar());
-				MessageBox.Show(insertID.ToString());
 			}
 			catch(Exception e) {
 				Console.WriteLine(e);
