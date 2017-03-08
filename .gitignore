@@ -1,9 +1,19 @@
 
 appProg/.vs/
+appProg/.idea/
+
 appProg/bin/
 appProg/obj/
 appProg/packages/
 appProg/resources/
 
-dataBase/assets/
-dataBase/public/
+
+
+
+dataBase/.idea/
+dataBase/node_modules/
+
+dataBase/build/
+
+
+
