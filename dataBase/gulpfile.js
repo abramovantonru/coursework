@@ -28,7 +28,7 @@ var path = {
 		css: 'src/css/main.css'
 	},
 	watch: {
-		html: 'src/template/*.html',
+		html: 'src/template/**/*.html',
 		js: 'src/js/core.js',
 		css: 'src/css/main.css'
 	}
