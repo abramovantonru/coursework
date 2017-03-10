@@ -22,7 +22,11 @@ $(document).ready(function () {
 					$response = undefined,
 					$progressBar = undefined,
 
-					$doubleInputs = undefined;
+					$magazine = undefined,
+					$counts = undefined,
+
+					$doubleInputs = undefined,
+					$integerInputs = undefined;
 				return{
 					init: function () {
 						$form = $('#send_form');
@@ -31,7 +35,11 @@ $(document).ready(function () {
 						$response = $form.find('.response');
 						$progressBar = $form.find('.progress_bar');
 
+						$magazine = $('#form_magazine');
+						$counts = $('#form_counts');
+
 						$doubleInputs = $form.find('.only_double');
+						$integerInputs = $form.find('.only_integer');
 
 						if(typeof $progressBar !== 'undefined')
 							$progressBar.progressbar({
@@ -39,25 +47,98 @@ $(document).ready(function () {
 								value: 0
 							});
 
-
 						this.events();
 					},
 					events: function () {
-						$form
-							.unbind('submit.sendData')
-							.bind('submit.sendData', function (e) {
-								e.preventDefault();
-								Form.send(this);
-								return false;
-							});
+						if($form.length)
+							$form
+								.unbind('submit.sendData')
+								.bind('submit.sendData', function (e) {
+									e.preventDefault();
+									if(!Form.validation(this)) return false;
+									Form.send(this);
+									return false;
+								});
 
-						$doubleInputs
-							.unbind('input.onlyDouble')
-							.bind('input.onlyDouble', function (e) {
-								e.preventDefault();
-								this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-								return false;
-							});
+						if($doubleInputs.length)
+							$doubleInputs
+								.unbind('input.onlyDouble')
+								.bind('input.onlyDouble', function (e) {
+									e.preventDefault();
+									this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+									return false;
+								});
+
+						if($integerInputs.length)
+							$integerInputs
+								.unbind('input.onlyInteger')
+								.bind('input.onlyInteger', function (e) {
+									e.preventDefault();
+									this.value = this.value.replace(/[^0-9\.]/g,'');
+									return false;
+								});
+
+						if($magazine.length){
+							$('#form_magazine_add')
+								.unbind('click.add')
+								.bind('click.add', function (e) {
+									e.preventDefault();
+									var $clone = $magazine.find('select').first().clone();
+									
+									$clone
+										.attr('value', '')
+										.attr('required', false);
+									$(this).before($clone[0].outerHTML);
+
+									$clone = $counts.find('input').first().clone();
+									$clone
+										.attr('value', '')
+										.attr('required', false);
+									$counts.append($clone[0].outerHTML);
+
+									return false;
+								});
+
+							$('#form_magazine_remove')
+								.unbind('click.remove')
+								.bind('click.remove', function (e) {
+									e.preventDefault();
+									var
+										$elements = $magazine.find('select'),
+										idx = $elements.last().index();
+
+									if(idx){
+										$elements.eq(idx).remove();
+										$elements = $counts.find('input');
+										$elements.eq(idx).remove();
+									}else{
+										$magazine.find('select').eq(0)
+											.val('');
+										$counts.find('input').eq(0)
+											.val('');
+									}
+
+									return false;
+								});
+						}
+					},
+					validation: function ($form) {
+						var error = '';
+
+						$form.find('*').each(function (idx, element) {
+							if($(element).attr('data-valid') === 'novalid') return true;
+							
+							var name = $('label[for="' + $(element).attr('id') + '"]').text();
+							
+							if($(element).attr('required') === 'required' && $(element).val() == '')
+								error = 'Не заполнено обязательное поле "' + name + '"!';
+						});
+						if(error.length){
+							console.log(error);
+							return false;
+						}
+
+						return true;
 					},
 					send: function (that) {
 						var
@@ -94,6 +175,9 @@ $(document).ready(function () {
 			Menu = (function () {
 				var
 					$menu = undefined,
+					$submenu = undefined,
+					$menu_item = undefined,
+
 					items = [
 						{name: 'Покупки', link: '123'},
 						{name: 'Товары', link: [
@@ -102,17 +186,21 @@ $(document).ready(function () {
 							{name: 'Редактировать', link: '/products.edit.html'}
 						]}
 					],
+					submenu = [],
+
 					i = 0, j = 0,
 					length = 0,
+
 					html = '',
-					submenu = [],
-					$submenu = undefined,
 					height = window.innerHeight;
 				return{
 					init: function () {
 						length = items.length;
 						$menu = $('#menu');
+
 						if(!length || !$menu.length) return false;
+
+						$submenu = $('#submenu');
 						
 						for(i = 0; i < length; i++){
 							var
@@ -122,75 +210,106 @@ $(document).ready(function () {
 								var
 									subItems = item.link,
 									lenSubItems = subItems.length;
+
 								submenu[i] = [];
 								for(j = 0; j < lenSubItems; j++)
 									submenu[i].push({name: subItems[j].name, link: subItems[j].link});
 
 								html += '<a href="#" class="menu-item parent">' + item.name + '</a>';
-							}else if(type === 'string' && item.link != ''){
+							}else if(type === 'string' && item.link != '')
 								html += '<a href="' + item.link + '" class="menu-item">' + item.name + '</a>';
-							}
 						}
 
-						$menu.html($.parseHTML(html));
+						if(html.length)
+							$menu.html($.parseHTML(html));
 
-						//$submenu = $('.submenu');
+						$menu_item = $('.menu-item');
 
 						this.events();
 					},
 					events: function () {
 						$menu.resizable({
 							minWidth: 100,
-							animate: true,
+							maxWidth: 300,
 							handles: 'e',
-							animateDuration: 'fast',
 							resize: function( event, ui ) {
 								ui.size.height = height;
+								$submenu.css('left', ui.size.width + 'px');
 							}
 						});
-
 
 						$menu
 							.unbind('click.toggleMenu')
 							.bind('click.toggleMenu', function (e) {
 								e.preventDefault();
-								console.log(123);
+								if (e.offsetX > $menu[0].offsetWidth)
+									Menu.toggle();
 								return false;
 							});
 
-						$('.menu-item')
+						$menu_item
 							.unbind('click.selectItem')
 							.bind('click.selectItem', function (e) {
 								e.preventDefault();
+
 								var url = $(this).attr('href');
 								if(url == '#'){
 									var idx = $('.menu-item').index(this);
 									Menu.submenu.init(idx);
-									//Menu.submenu.show(idx);
-								}else
-									window.location = url;
+									Menu.submenu.show();
+								}else window.location = url;
 
 								return false;
 							});
 					},
 					submenu:{
 						init: function(idx){
-							console.log(idx);
-							console.log(submenu[idx]);
-							console.log(submenu);
+							var html = '';
+
+							length = submenu[idx].length;
+							for(i = 0; i < length; i++)
+								html += '<a href="' + submenu[idx][i].link + '" class="menu-item">' + submenu[idx][i].name + '</a>';
+
+							$submenu.html(html);
 						},
-						show: function (idx) {
-							
+						show: function () {
+							$submenu
+								.addClass('open')
+								.css('display', 'block')
+								.resizable({
+									minWidth: 100,
+									maxWidth: 300,
+									handles: 'e',
+									resize: function( event, ui ) {
+										ui.size.height = height;
+									}
+								});
 						},
-						hide: function (idx) {
-							
+						hide: function () {
+							$submenu
+								.removeClass('open')
+								.css('display', 'none');
+							if($submenu.resizable('instance'))
+								$submenu.resizable('destroy');
 						}
 					},
 					show: function () {
 						$menu.addClass('open');
+						$menu.css('left', '0');
+						$menu.resizable('option', 'disabled', false);
 					},
 					hide: function () {
+						$menu.css('left', '-' + $menu.width() + 'px');
 						$menu.removeClass('open');
+						$menu.resizable('option', 'disabled', true);
+						Menu.submenu.hide();
+					},
+					toggle: function () {
+						console.log('toggle');
+						if($menu.hasClass('open'))
+							Menu.hide();
+						else
+							Menu.show();
 					}
 				}
 			})();

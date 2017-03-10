@@ -8,45 +8,45 @@ body{
 	background-color: #edeef0;
 }
 
-section.menu{
+#menu{
 	position: absolute;
 	left: 0;
 	top: 0;
 	z-index: 5;
-	display: none;
+	display: block;
 	min-width: 100px;
 	height: 100%;
 	background: #fff;
 	border: 1px solid #e7e8ec;
 	border-radius: 2px;
 	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
-	pointer-events: none;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 #menu:after{
 	position: absolute;
 	content: '';
-	width: 16px;
-	height: 16px;
+	width: 15px;
+	height: 50px;
 	top: 50%;
-	right: -5px;
-	z-index: 10;
+	right: -18px;
 	border: 1px solid #e7e8ec;
 	border-radius: 2px;
 	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
-	/*background-color: #edeef0;*/
-	float: left;
-	margin: 0 4px;
+	background-color: #fff;
 	overflow: hidden;
-	background: #fff url(images/ui-icons_444444_256x240.png) -96px -16px;
-	pointer-events: all;
+	z-index: 15;
 }
 
-section.submenu{
+#submenu{
 	position: absolute;
 	top: 0;
 	left: 100px;
-	z-index: 5;
+	z-index: 4;
 	display: none;
 	min-width: 100px;
 	height: 100%;
@@ -56,9 +56,10 @@ section.submenu{
 	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
 }
 
-section.menu.open{
-	display: block;
+#form_stores{
+	margin-bottom: 10px;
 }
+
 .ui-resizable-helper { border: 1px dotted gray; }
 
 section.content{
@@ -84,6 +85,12 @@ label {
 	text-align: right;
 	padding: .4em 5px .4em .4em;
 }
+label.required::after {
+	color: red;
+	content: ' *';
+	display:inline;
+}
+
 form > input, select, textarea {
 	float: left;
 	margin-bottom: 10px;
@@ -124,15 +131,35 @@ fieldset{
 	overflow: hidden;
 	color: black;
 	text-decoration: none;
-	pointer-events: all
 }
 .menu-item:hover{
 	background-color: #ededed;
 	overflow: visible;
-	text-decoration: underline;
 	cursor: pointer;
 }
 
-.menu-item.parent{
-	content: "123";
+.text-red{
+	color: red;
+}
+
+.col-2 {
+	width: 40%;
+	display: inline-block;
+	float: left;
+
+}
+.col-2:nth-child(1){
+	padding-right: 10px;
+}
+.col-2:nth-child(2){
+	padding-left: 10px;
+}
+
+.col-2 input,
+.col-2 select{
+	width: 100%;
+}
+
+.clearfix{
+	clear: both;
 }
