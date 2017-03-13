@@ -1,4 +1,5 @@
 *{
+	font-family: "DejaVu Sans", sans-serif;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
@@ -9,12 +10,12 @@ body{
 }
 
 #menu{
-	position: absolute;
+	position: fixed;
 	left: 0;
 	top: 0;
 	z-index: 5;
 	display: block;
-	min-width: 100px;
+	min-width: 120px;
 	height: 100%;
 	background: #fff;
 	border: 1px solid #e7e8ec;
@@ -43,9 +44,9 @@ body{
 }
 
 #submenu{
-	position: absolute;
+	position: fixed;
 	top: 0;
-	left: 100px;
+	left: 120px;
 	z-index: 4;
 	display: none;
 	min-width: 100px;
@@ -54,6 +55,11 @@ body{
 	border: 1px solid #e7e8ec;
 	border-radius: 2px;
 	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 #form_stores{
@@ -109,6 +115,7 @@ select{
 }
 
 fieldset{
+	padding: 10px;
 	width: 100%;
 	margin: 20px 0;
 	border: 1px solid #e7e8ec;
@@ -116,7 +123,7 @@ fieldset{
 	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
 }
 
-.response-block{
+.alert-block{
 	margin: 20px 0;
 	padding: 1em;
 }
@@ -125,12 +132,13 @@ fieldset{
 	position: relative;
 	display: block;
 	margin: 20px auto;
-	padding: 20px;
+	padding: 10px;
 	background-color: #f6f6f6;
 	width: 100%;
 	overflow: hidden;
-	color: black;
+	color: #337ab7;
 	text-decoration: none;
+	height: 40px;
 }
 .menu-item:hover{
 	background-color: #ededed;
@@ -162,4 +170,49 @@ fieldset{
 
 .clearfix{
 	clear: both;
+}
+
+#alerts{
+	display: none;
+}
+.load-alert{
+	display: none;
+}
+
+.load-alert.loaded{
+	display: block;
+}
+
+#page_title{
+	padding: 10px;
+	margin: 10px 0 0 0;
+}
+
+label[for="form_search"]{
+	padding: 0 10px 0 0;
+}
+
+#form_search{
+	margin: 0;
+}
+
+.badge{
+	width: 46px;
+	height: 26px;
+	line-height: 26px;
+	background: #337ab7;
+	text-align: center;
+	vertical-align: middle;
+	margin: auto 5px;
+	color: #fff;
+	font-weight: 700;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+button[disabled]:hover,
+select[disabled]:hover,
+input[disabled]:hover
+{
+	cursor: not-allowed;
 }

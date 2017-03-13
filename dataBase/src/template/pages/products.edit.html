@@ -1,10 +1,10 @@
 //= ../header.html
 <span data-key="section" data-value="Товары" class="meta"></span>
-<span data-key="page" data-value="Создать" class="meta"></span>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
 //= ../core.html
 
-<form id="send_form" data-url="getPath=api,products" data-method="POST" class="ui-widget">
-	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению</span>
+<form id="send_form" data-url="getPath=api,products" data-method="POST" class="ui-widget disable">
+	<span data-type="info" class="load-alert">'Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению'</span>
 	<fieldset>
 		<label for="form_name" class="required">Название</label>
 		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
@@ -30,27 +30,26 @@
 		<label for="form_stores">На складе</label>
 		<div id="form_stores">
 			<div id="form_magazine" class="col-2">
-				<select name="stores[]"  class="text ui-widget-content ui-corner-all producer" data-loadSelect="true" data-url="getPath=api,producers" required="required">
+				<select class="text ui-widget-content ui-corner-all producer" data-loadSelect="true" data-url="getPath=api,producers" required="required">
 					<option value="">Выберите магазин</option>
 				</select>
 				<button type="button" id="form_magazine_add" class="ui-button ui-corner-all ui-widget">Добавить</button>
 				<button type="button" id="form_magazine_remove" class="ui-button ui-corner-all ui-widget">Удалить</button>
 			</div>
 			<div id="form_counts" class="col-2">
-				<input name="counts[]" type="text" class="text ui-widget-content ui-corner-all only_int" placeholder="Введите количество" required="required">
+				<input type="text" class="text ui-widget-content ui-corner-all only_int" placeholder="Введите количество" required="required">
 			</div>
 			<div class="clearfix"></div>
 		</div>
 
 		<label for="form_producer">Производитель</label>
-		<select id="form_producer" name="producer" class="text ui-widget-content ui-corner-all">
-			<!--required="required"-->
+		<select id="form_producer" name="producer" class="text ui-widget-content ui-corner-all" required="required">
 			<option value="">Выберите производителя</option>
 		</select>
 	</fieldset>
 
-	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
-	<button type="reset" class="ui-button ui-corner-all ui-widget">Сбросить</button>
+	<button type="button" class="ui-button ui-corner-all ui-widget form-enable">Разблокировать</button>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
 
 	<br>
 	<span class="response"></span>
