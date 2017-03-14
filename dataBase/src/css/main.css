@@ -216,3 +216,43 @@ input[disabled]:hover
 {
 	cursor: not-allowed;
 }
+
+.items{
+	padding: 10px;
+	width: 100%;
+	margin: 20px 0;
+	border: 1px solid #e7e8ec;
+	border-radius: 2px;
+	box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+
+}
+.items .item{
+	padding: 10px;
+	border-radius: 5px;
+	margin: 10px auto;
+	width: 100%;
+	display: block;
+	border: 1px solid #c5c5c5;
+	background: #f6f6f6;
+	color: #337ab7;
+	text-decoration: none;
+}
+.items .item:hover{
+	text-decoration: underline;
+}
+
+.items .item .to_order,
+.items .item .from_order
+{
+	float: right;
+	border: 3px dotted #337ab7;
+	padding: 0 10px 0 10px;
+	z-index: 5;
+	display: block;
+}
+.to_order:hover,
+.from_order:hover
+{
+	opacity: .5;
+	color: red;
+}

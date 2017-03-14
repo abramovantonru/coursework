@@ -20,6 +20,7 @@ $(document).ready(function () {
 						Menu.init();
 						Alert.init();
 						Form.init();
+						Order.init();
 					}
 				}
 			})(),
@@ -199,7 +200,9 @@ $(document).ready(function () {
 					$counts = undefined,
 
 					$doubleInputs = undefined,
-					$integerInputs = undefined;
+					$integerInputs = undefined,
+					i = 0, j = 0, k = 0,
+					length = 0;
 				return{
 					init: function () {
 						$form = $('#send_form');
@@ -346,6 +349,7 @@ $(document).ready(function () {
 						var
 							url = $(that).attr('data-url'),
 							method = $(that).attr('data-method'),
+							view = $(that).attr('data-view'),
 							data = new FormData(that),
 							xhr = function () { return $.ajaxSettings.xhr(); };
 
@@ -375,12 +379,25 @@ $(document).ready(function () {
 								$response.html('');
 							},
 							success: function (res) {
+								if(view === 'view'){
+									$response.html($.parseHTML(res.html));
+								}
 								console.log(res);
 							},
 							error: function (res) {
 								if(res.status && res.statusText && res.statusText.length)
 									$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
-								console.log(res);
+
+								if(view === 'list'){
+									var items = [
+										{name: 'Стул белый', edit: '/products.edit.html?=id=1', buy: '/order.add?id=1'},
+										{name: 'Стул черный', edit: '/products.edit.html?=id=2', buy: '/order.add?id=2'}
+									];
+									var html = '<div class="items"><a class="item" href="' + items[i].edit + '">' + items[i].name + ' ' +
+									'<span data-buy="' + items[i].buy + '" class="to_order">В заказ</span>' +
+									'</a></div>';
+									$response.html(html);
+								}
 							}
 						});
 					},
@@ -390,6 +407,134 @@ $(document).ready(function () {
 							$form.attr('data-url', url);
 						else
 							$form.prepend(Alert.error('Не удалось получить ссылку формы.'));
+					}
+				}
+			})(),
+			Order = (function () {
+				var
+					_items = [],
+
+					$count = undefined,
+					$orderBtn = undefined,
+
+					i = 0, j = 0, k = 0,
+					length = 0;
+				return{
+					init: function () {
+						$count = $('#order_items_count');
+						$orderBtn = $('.order_btn');
+
+						Order.set();
+						Order.events();
+					},
+					events: function () {
+						if($orderBtn.length)
+							$orderBtn.each(function (idx, element) {
+								var id = parseInt($(element).attr('data-id'));
+								if(!isNaN(id) && _items.length && _items.indexOf(id) > -1)
+									Order.binder.from(element);
+								else
+									Order.binder.to(element);
+							});
+					},
+					binder:{
+						to: function (that) {
+							$(that)
+								.text('В заказ')
+								.removeClass('from_order')
+								.addClass('to_order')
+								.unbind('click.addToOrder')
+								.bind('click.addToOrder', function (e) {
+									e.preventDefault();
+									var id = parseInt($(this).attr('data-id'));
+
+									if(id > 0)
+										Order.add(id);
+
+									Order.binder.from(that);
+
+									return false;
+								});
+						},
+						from: function (that) {
+							$(that)
+								.text('Отмена')
+								.removeClass('to_order')
+								.addClass('from_order')
+								.unbind('click.addToOrder')
+								.bind('click.addToOrder', function (e) {
+									e.preventDefault();
+									var id = parseInt($(that).attr('data-id'));
+
+									if(id > 0)
+										Order.remove(id);
+
+									Order.binder.to(that);
+
+									return false;
+								});
+						}
+					},
+					set: function (value) {
+						if(!value) {
+							var items = Storage.get('order');
+							if(items && items.length) {
+								_items = items;
+							}
+							else{
+								_items = [];
+								Order.save();
+							}
+						}else{
+							_items = value;
+							Order.save();
+						}
+					},
+					get: function () {
+						return _items;
+					},
+					add: function (value) {
+						if(!isNaN(value) && typeof value === 'number') {
+							if(_items.indexOf(value) == -1)
+								_items.push(parseInt(value));
+						}
+						else{
+							length = value.length;
+							for(i = 0; i < length; i++)
+								if(!isNaN(value) && _items.indexOf(value) == -1)
+									_items.push(parseInt(value[i]));
+						}
+
+						Order.save();
+					},
+					remove: function (id) {
+						var items = [];
+						length = _items.length;
+
+						for(i = 0; i < length; i++)
+							if(_items[i] != id)
+								items.push(_items[i]);
+
+						Order.set(items);
+					},
+					save: function () {
+						Storage.set('order', _items);
+						length = _items.length;
+						$count.text(length);
+					},
+					clear: function () {
+						_items = [];
+						Order.save();
+					}
+				}
+			})(),
+			Storage = (function () {
+				return{
+					set: function (key, value) {
+						localStorage.setItem(key, JSON.stringify(value));
+					},
+					get: function (key) {
+						return JSON.parse(localStorage.getItem(key));
 					}
 				}
 			})(),
