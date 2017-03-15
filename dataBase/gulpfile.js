@@ -13,12 +13,11 @@ var
 	browserSync = require('browser-sync'),
 	reload = browserSync.reload;
 
-
 var path = {
 	build: {
-		html: 'build/',
-		js: 'build/resources/js/',
-		css: 'build/resources/css/',
+		html: './php/public',
+		js: 'php/public/resources/js/',
+		css: 'php/public/resources/css/',
 		js_concat: 'script.min.js',
 		css_concat: 'style.min.css'
 	},
@@ -36,7 +35,7 @@ var path = {
 
 var config = {
 	server: {
-		baseDir: "./build"
+		baseDir: './php/public'
 	},
 	tunnel: true,
 	host: 'localhost',

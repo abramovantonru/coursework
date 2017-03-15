@@ -3,17 +3,12 @@
 <span data-key="page" data-value="Список" class="meta"></span>
 //= ../core.html
 
-<form id="send_form" data-init="true" data-url="getPath=api,products" data-method="POST" class="ui-widget">
+<form id="send_form" data-modules="order" data-init="getPath=products" data-url="getPath=products,search" data-method="GET" class="ui-widget">
 	<fieldset>
 		<label for="form_search"><button type="submit" class="ui-button ui-corner-all ui-widget">Поиск</button></label>
 		<input type="text" id="form_search" name="query" placeholder="Введите название, ключевое слово или что-то еще" class="text ui-widget-content ui-corner-all" required="required">
 	</fieldset>
-	<span class="response">
-		<div class="items">
-			<a class="item" href="/products.list.html?edit=1">Черный стул <span data-id="1" class="order_btn">В заказ</span></a>
-			<a class="item" href="/products.list.html?edit=2">Белый стул <span data-id="2" class="order_btn">В заказ</span></a>
-		</div>
-	</span>
+	<span class="response"></span>
 </form>
 
 //= ../footer.html

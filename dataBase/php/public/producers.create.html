@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang=ru>
+<head>
+	<!--meta tags-->
+	<meta charset="utf-8">
+	<meta name="viewport"
+	      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<!--meta tags-->
+
+	<!--link css-->
+	<link rel="stylesheet" href="/resources/css/jquery-ui.min.css">
+	<link rel="stylesheet" href="/resources/css/jquery-ui.structure.min.css">
+	<link rel="stylesheet" href="/resources/css/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="/resources/css/style.min.css">
+	<!--link css-->
+
+	<!--link js-->
+	<script src="/resources/js/jquery-3.1.1.min.js"></script>
+	<script src="/resources/js/jquery-ui.min.js"></script>
+	<script src="/resources/js/script.min.js"></script>
+	<!--link js-->
+
+	<!--other-->
+	<title id="title"></title>
+	<!--other-->
+</head>
+<body>
+<span data-key="section" data-value="Производители" class="meta"></span>
+<span data-key="page" data-value="Создать" class="meta"></span>
+<div id="side_menu">
+	<section id="menu" class="menu open"></section>
+	<section id="submenu" class="submenu"></section>
+	<span id="menu_toggle"></span>
+</div>
+
+<div id="alerts">
+	<p class="alert-block alert-info ui-corner-all ui-state-default">
+		<span class="ui-icon ui-icon-info"></span>
+		<strong>Примечание</strong> <span class="text">...</span>
+	</p>
+	<p class="alert-block alert-success ui-corner-all ui-state-highlight">
+		<span class="ui-icon ui-icon-check"></span>
+		<strong>Успешно!</strong> <span class="text">...</span>
+	</p>
+	<p class="alert-block alert-error ui-corner-all ui-state-error">
+		<span class="ui-icon ui-icon-alert"></span>
+		<strong>Ошибка!</strong> <span class="text">...</span>
+	</p>
+</div>
+
+<section class="content">
+	<h1 id="page_title"></h1>
+
+<form id="send_form" data-url="getPath=producers" data-method="POST" class="ui-widget">
+	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению</span>
+	<fieldset>
+		<label for="form_name" class="required">Название</label>
+		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
+
+		<label for="form_guarantee">Гарантия</label>
+		<input type="text" id="form_guarantee" placeholder="Гарантия (в днях)" name="guarantee" class="text ui-widget-content ui-corner-all only_integer">
+	</fieldset>
+
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
+	<button type="reset" class="ui-button ui-corner-all ui-widget">Сбросить</button>
+
+	<br>
+	<span class="response"></span>
+</form>
+
+</section>
+</body>
+</html>

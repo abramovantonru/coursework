@@ -2,12 +2,11 @@ console.time('main');
 const
 	title = 'Сеть мебельных магазинов',
 	paths = {
-	api: {
-		main: '/api',
-		producers:{
-			main:  '/producers'
-		},
-		products: '/products'
+	stores: '/stores',
+	producers: '/producers',
+	products:{
+		main: '/products',
+		search: '/search'
 	}
 };
 
@@ -29,6 +28,15 @@ $(document).ready(function () {
 					i = 0, j = 0, k = 0,
 					length = 0;
 				return{
+					parseModuleNames: function (string) {
+						var modules = [];
+						try{
+							modules = string.split(',');
+						}catch (e){
+							console.error(e);
+						}
+						return modules;
+					},
 					queryString: function() {
 						var string = window.location.search.substr(1).split('&');
 						length = string.length;
@@ -79,56 +87,48 @@ $(document).ready(function () {
 							if(url.indexOf('getPath') > -1){
 								var path = Utils.secureGetPath(url);
 
-								if(path && path.length)
+								if(path && path.length){
 									$(element).attr('data-url', path);
+									url = path;
+								}
 							}
 							if(!url.length) return true;
+
 							$(element)
-								.attr('disable', true)
+								.attr('disabled', true)
 								.prepend('<option value="" selected="selected">Загрузка списка...</option>');
 
-							var
-								html = '',
-								items = [{key: 'Элемент1', value: '1'}, {key: 'Элемент2', value: '2'}];
-							length = items.length;
-							if(length)
-								html = Utils.selectFromArray(items);
-							$(element).append(html);
-							$(element)
-								.attr('disable', true)
-								.find('option').first().remove();
-
-							/*$.ajax({
-							 url: url,
-							 type: 'GET',
-							 dataType: 'json',
-							 success: function (res) {
-							 if(res.success && res.items){
-							 var
-							 html = '',
-							 items = res.items;
-							 length = items.length;
-							 if(length)
-							 html = Utils.selectFromArray(items);
-							 $(element).append(html);
-							 $(element)
-							 .attr('disable', true)
-							 .find('option').first().remove();
-							 }
-							 },
-							 error: function (res) {
-
-							 }
-							 });*/
+							$.ajax({
+								url: url,
+								type: 'GET',
+								dataType: 'json',
+								success: function (res) {
+									if(res.success && res.items){
+										var html = Utils.selectFromArray(res.items);
+										$(element).append(html);
+										$(element)
+											.attr('disabled', false)
+											.find('option').first().remove();
+									}else{
+										$(element)
+											.attr('disabled', true)
+											.html('<option value="" selected="selected">Ошибка! Не удалось загрузить список.</option>');
+									}
+								},
+								error: function (res) {
+									$(element)
+										.attr('disabled', true)
+										.html('<option value="" selected="selected">Ошибка! Не удалось загрузить список.</option>');
+									console.error(res);
+								}
+							});
 						});
 					},
-					selectFromArray: function (data) {
-						if(typeof data === 'undefined' || !data.length) return false;
+					selectFromArray: function (items) {
+						if(typeof items === 'undefined') return false;
 						var html = '';
-						length = data.length;
-						for(i = 0; i < length; i++)
-							if(data[i].value && data[i].key)
-								html += '<option value="' + data[i].value + '">' + data[i].key + '</option>';
+						for(i in items)
+							html += '<option value="' + i + '">' + items[i] + '</option>';
 						return html;
 					}
 				}
@@ -229,6 +229,12 @@ $(document).ready(function () {
 						Utils.loadSelects($form);
 
 						Form.events();
+						var init_url = $form.attr('data-init');
+						if(init_url.length){
+							init_url = Utils.secureGetPath(init_url);
+							if(init_url)
+								Form.send($form, init_url);
+						}
 
 						if($form.hasClass('disable'))
 							Form.disable();
@@ -254,7 +260,6 @@ $(document).ready(function () {
 								.unbind('submit.sendData')
 								.bind('submit.sendData', function (e) {
 									e.preventDefault();
-									if(!Form.validation(this)) return false;
 									Form.send(this);
 									return false;
 								});
@@ -273,7 +278,10 @@ $(document).ready(function () {
 								.unbind('input.onlyInteger')
 								.bind('input.onlyInteger', function (e) {
 									e.preventDefault();
-									this.value = this.value.replace(/[^0-9\.]/g,'');
+									if (/\D/g.test(this.value))
+									{
+										this.value = this.value.replace(/\D/g, '');
+									}
 									return false;
 								});
 
@@ -328,28 +336,12 @@ $(document).ready(function () {
 								});
 						}
 					},
-					validation: function (form) {
-						var error = '';
-						$(form).find('*').each(function (idx, element) {
-							if($(element).attr('data-valid') === 'novalid') return true;
-
-							var name = $('label[for="' + $(element).attr('id') + '"]').text();
-
-							if($(element).attr('required') === 'required' && $(element).val() == '')
-								error = 'Не заполнено обязательное поле "' + name + '"!';
-						});
-						if(error.length){
-							console.error(error);
-							return false;
-						}
-
-						return true;
-					},
-					send: function (that) {
+					send: function (that, init_url) {
 						var
-							url = $(that).attr('data-url'),
+							url = init_url || $(that).attr('data-url'),
 							method = $(that).attr('data-method'),
 							view = $(that).attr('data-view'),
+							moduleNames = $(that).attr('data-modules'),
 							data = new FormData(that),
 							xhr = function () { return $.ajaxSettings.xhr(); };
 
@@ -369,9 +361,8 @@ $(document).ready(function () {
 						$.ajax({
 							url: url,
 							method: method,
-							data: data,
+							data: $form.serialize(),
 							processData: false,
-							contentType: 'multipart/form-data',
 							dataType: 'json',
 							cache: false,
 							xhr: xhr,
@@ -379,25 +370,19 @@ $(document).ready(function () {
 								$response.html('');
 							},
 							success: function (res) {
-								if(view === 'view'){
-									$response.html($.parseHTML(res.html));
-								}
-								console.log(res);
+								if(res.success && res.template)
+									$response.html($.parseHTML(res.template));
+
+								var modules = [];
+								if(moduleNames.length)
+									modules = Utils.parseModuleNames(moduleNames);
+
+								if(modules.indexOf('order') > -1)
+									Order.init();
 							},
 							error: function (res) {
 								if(res.status && res.statusText && res.statusText.length)
 									$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
-
-								if(view === 'list'){
-									var items = [
-										{name: 'Стул белый', edit: '/products.edit.html?=id=1', buy: '/order.add?id=1'},
-										{name: 'Стул черный', edit: '/products.edit.html?=id=2', buy: '/order.add?id=2'}
-									];
-									var html = '<div class="items"><a class="item" href="' + items[i].edit + '">' + items[i].name + ' ' +
-									'<span data-buy="' + items[i].buy + '" class="to_order">В заказ</span>' +
-									'</a></div>';
-									$response.html(html);
-								}
 							}
 						});
 					},
@@ -565,7 +550,7 @@ $(document).ready(function () {
 						]},
 						{name: 'Производители', link: [
 							{name: 'Список', link: '/stores.list.html'},
-							{name: 'Создать', link: '/stores.create.html'},
+							{name: 'Создать', link: '/producers/create'},
 							{name: 'Редактировать', link: '/stores.edit.html'},
 							{name: 'Отчеты', link: '/stores.reviews.html'}
 						]}

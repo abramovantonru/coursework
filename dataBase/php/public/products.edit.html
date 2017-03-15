@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang=ru>
+<head>
+	<!--meta tags-->
+	<meta charset="utf-8">
+	<meta name="viewport"
+	      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<!--meta tags-->
+
+	<!--link css-->
+	<link rel="stylesheet" href="/resources/css/jquery-ui.min.css">
+	<link rel="stylesheet" href="/resources/css/jquery-ui.structure.min.css">
+	<link rel="stylesheet" href="/resources/css/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="/resources/css/style.min.css">
+	<!--link css-->
+
+	<!--link js-->
+	<script src="/resources/js/jquery-3.1.1.min.js"></script>
+	<script src="/resources/js/jquery-ui.min.js"></script>
+	<script src="/resources/js/script.min.js"></script>
+	<!--link js-->
+
+	<!--other-->
+	<title id="title"></title>
+	<!--other-->
+</head>
+<body>
+<span data-key="section" data-value="Товары" class="meta"></span>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
+<div id="side_menu">
+	<section id="menu" class="menu open"></section>
+	<section id="submenu" class="submenu"></section>
+	<span id="menu_toggle"></span>
+</div>
+
+<div id="alerts">
+	<p class="alert-block alert-info ui-corner-all ui-state-default">
+		<span class="ui-icon ui-icon-info"></span>
+		<strong>Примечание</strong> <span class="text">...</span>
+	</p>
+	<p class="alert-block alert-success ui-corner-all ui-state-highlight">
+		<span class="ui-icon ui-icon-check"></span>
+		<strong>Успешно!</strong> <span class="text">...</span>
+	</p>
+	<p class="alert-block alert-error ui-corner-all ui-state-error">
+		<span class="ui-icon ui-icon-alert"></span>
+		<strong>Ошибка!</strong> <span class="text">...</span>
+	</p>
+</div>
+
+<section class="content">
+	<h1 id="page_title"></h1>
+
+<form id="send_form" data-url="getPath=api,products" data-method="POST" class="ui-widget disable">
+	<span data-type="info" class="load-alert">'Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению'</span>
+	<fieldset>
+		<label for="form_name" class="required">Название</label>
+		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
+
+		<label for="form_weight">Вес</label>
+		<input type="text" id="form_weight" placeholder="Вес" name="weight" class="text ui-widget-content ui-corner-all only_double">
+
+		<label for="form_length">Длина</label>
+		<input type="text" id="form_length" placeholder="Длина" name="length" class="text ui-widget-content ui-corner-all only_double">
+
+		<label for="form_width">Ширина</label>
+		<input type="text" id="form_width" placeholder="Ширина" name="width" class="text ui-widget-content ui-corner-all only_double">
+
+		<label for="form_volume">Объем</label>
+		<input type="text" id="form_volume" placeholder="Объем" name="volume" class="text ui-widget-content ui-corner-all only_double">
+
+		<label for="form_cost">Стоимость</label>
+		<input type="text" id="form_cost" placeholder="Стоимость" name="cost" class="text ui-widget-content ui-corner-all only_integer">
+
+		<label for="form_days_wait">Дней под заказ</label>
+		<input type="text" id="form_days_wait" placeholder="Дней под заказ" name="days_wait" class="text ui-widget-content ui-corner-all only_double">
+
+		<label for="form_stores">На складе</label>
+		<div id="form_stores">
+			<div id="form_magazine" class="col-2">
+				<select class="text ui-widget-content ui-corner-all producer" data-loadSelect="true" data-url="getPath=api,producers" required="required">
+					<option value="">Выберите магазин</option>
+				</select>
+				<button type="button" id="form_magazine_add" class="ui-button ui-corner-all ui-widget">Добавить</button>
+				<button type="button" id="form_magazine_remove" class="ui-button ui-corner-all ui-widget">Удалить</button>
+			</div>
+			<div id="form_counts" class="col-2">
+				<input type="text" class="text ui-widget-content ui-corner-all only_int" placeholder="Введите количество" required="required">
+			</div>
+			<div class="clearfix"></div>
+		</div>
+
+		<label for="form_producer">Производитель</label>
+		<select id="form_producer" name="producer" class="text ui-widget-content ui-corner-all" required="required">
+			<option value="">Выберите производителя</option>
+		</select>
+	</fieldset>
+
+	<button type="button" class="ui-button ui-corner-all ui-widget form-enable">Разблокировать</button>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+
+	<br>
+	<span class="response"></span>
+	<div id="res"></div>
+</form>
+
+</section>
+</body>
+</html>
