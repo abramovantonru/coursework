@@ -120,9 +120,6 @@ namespace appProg
 				btnRemoveOrder.Bounds.Right + 10,
 				height / 2 + 10
 			);
-
-			//TODO set properties for search
-
 			/**
 			 * Get data from DB
 			 * */

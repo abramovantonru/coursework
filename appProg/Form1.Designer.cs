@@ -31,9 +31,6 @@
 			this.btnAppClose = new System.Windows.Forms.Button();
 			this.menu = new System.Windows.Forms.TabControl();
 			this.dishDetail = new System.Windows.Forms.TabControl();
-			this.searchBtn = new System.Windows.Forms.Button();
-			this.searchInput = new System.Windows.Forms.TextBox();
-			this.searchLabel = new System.Windows.Forms.Label();
 			this.order = new System.Windows.Forms.TabControl();
 			this.btnCreateOrder = new System.Windows.Forms.Button();
 			this.btnSaveOrder = new System.Windows.Forms.Button();
@@ -72,31 +69,6 @@
 			this.dishDetail.SelectedIndex = 0;
 			this.dishDetail.Size = new System.Drawing.Size(434, 287);
 			this.dishDetail.TabIndex = 3;
-			// 
-			// searchBtn
-			// 
-			this.searchBtn.Location = new System.Drawing.Point(338, 12);
-			this.searchBtn.Name = "searchBtn";
-			this.searchBtn.Size = new System.Drawing.Size(75, 23);
-			this.searchBtn.TabIndex = 4;
-			this.searchBtn.Text = "Поиск";
-			this.searchBtn.UseVisualStyleBackColor = true;
-			// 
-			// searchInput
-			// 
-			this.searchInput.Location = new System.Drawing.Point(100, 14);
-			this.searchInput.Name = "searchInput";
-			this.searchInput.Size = new System.Drawing.Size(196, 20);
-			this.searchInput.TabIndex = 5;
-			// 
-			// searchLabel
-			// 
-			this.searchLabel.AutoSize = true;
-			this.searchLabel.Location = new System.Drawing.Point(22, 17);
-			this.searchLabel.Name = "searchLabel";
-			this.searchLabel.Size = new System.Drawing.Size(39, 13);
-			this.searchLabel.TabIndex = 6;
-			this.searchLabel.Text = "Поиск";
 			// 
 			// order
 			// 
@@ -214,9 +186,6 @@
 			this.Controls.Add(this.btnSaveOrder);
 			this.Controls.Add(this.btnCreateOrder);
 			this.Controls.Add(this.order);
-			this.Controls.Add(this.searchLabel);
-			this.Controls.Add(this.searchInput);
-			this.Controls.Add(this.searchBtn);
 			this.Controls.Add(this.dishDetail);
 			this.Controls.Add(this.menu);
 			this.Controls.Add(this.btnAppClose);
@@ -236,9 +205,6 @@
         private System.Windows.Forms.Button btnAppClose;
         private System.Windows.Forms.TabControl menu;
 		private System.Windows.Forms.TabControl dishDetail;
-		private System.Windows.Forms.Button searchBtn;
-		private System.Windows.Forms.TextBox searchInput;
-		private System.Windows.Forms.Label searchLabel;
 		private System.Windows.Forms.TabControl order;
 		private System.Windows.Forms.Button btnCreateOrder;
 		private System.Windows.Forms.Button btnSaveOrder;
