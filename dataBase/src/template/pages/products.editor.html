@@ -1,62 +1,9 @@
-<!doctype html>
-<html lang=ru>
-<head>
-	<!--meta tags-->
-	<meta charset="utf-8">
-	<meta name="viewport"
-	      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<!--meta tags-->
-
-	<!--link css-->
-	<link rel="stylesheet" href="/resources/css/jquery-ui.min.css">
-	<link rel="stylesheet" href="/resources/css/jquery-ui.structure.min.css">
-	<link rel="stylesheet" href="/resources/css/jquery.datetimepicker.min.css">
-	<link rel="stylesheet" href="/resources/css/style.min.css">
-
-	<link rel="stylesheet" href="/resources/css/style.min.css">
-	<!--link css-->
-
-	<!--link js-->
-	<script src="/resources/js/jquery-3.1.1.min.js"></script>
-	<script src="/resources/js/jquery-ui.min.js"></script>
-	<script src="/resources/js/jquery.datetimepicker.min.js"></script>
-	<script src="/resources/js/script.min.js"></script>
-
-	<!--link js-->
-
-	<!--other-->
-	<title id="title"></title>
-	<!--other-->
-</head>
-<body>
+//= ../header.html
 <span data-key="section" data-value="Товары" class="meta"></span>
-<span data-key="page" data-value="Создать" class="meta"></span>
-<div id="side_menu">
-	<section id="menu" class="menu open"></section>
-	<section id="submenu" class="submenu"></section>
-	<span id="menu_toggle"></span>
-</div>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
+//= ../core.html
 
-<div id="alerts">
-	<p class="alert-block alert-info ui-corner-all ui-state-default">
-		<span class="ui-icon ui-icon-info"></span>
-		<strong>Примечание</strong> <span class="text">...</span>
-	</p>
-	<p class="alert-block alert-success ui-corner-all ui-state-highlight">
-		<span class="ui-icon ui-icon-check"></span>
-		<strong>Успешно!</strong> <span class="text">...</span>
-	</p>
-	<p class="alert-block alert-error ui-corner-all ui-state-error">
-		<span class="ui-icon ui-icon-alert"></span>
-		<strong>Ошибка!</strong> <span class="text">...</span>
-	</p>
-</div>
-
-<section class="content">
-	<h1 id="page_title"></h1>
-
-<form id="send_form" data-url="getPath=products" data-method="POST" class="ui-widget">
+<form id="product_editor" data-remove="getPath=products" data-load="/products/editor/load" data-url="getPath=products" data-method="PUT" class="ui-widget">
 	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению</span>
 	<fieldset>
 		<label for="form_article">Артикул</label>
@@ -104,13 +51,11 @@
 		</select>
 	</fieldset>
 
-	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
-	<button type="reset" class="ui-button ui-corner-all ui-widget">Сбросить</button>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+	<button type="button" id="remove_product" class="ui-button ui-corner-all ui-widget">Удалить</button>
 
 	<br>
 	<span class="response"></span>
 </form>
 
-</section>
-</body>
-</html>
+//= ../footer.html

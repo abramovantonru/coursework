@@ -8,9 +8,9 @@ define('DOMAIN', 'localhost');
  * Database
  */
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_NAME', 'furnitureStore');
-define('DB_PASSWORD', '123456');
+define('DB_USER', 'anton');
+define('DB_NAME', 'anton');
+define('DB_PASSWORD', 'GG12an');
 
 /**
  * Response

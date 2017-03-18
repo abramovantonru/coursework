@@ -22,11 +22,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 /**
- * Init constants
- */
-require_once '../app/const.php';
-
-/**
  * Autoload vendor libs
  */
 require_once '../vendor/autoload.php';

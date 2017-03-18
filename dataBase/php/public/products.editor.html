@@ -31,7 +31,7 @@
 </head>
 <body>
 <span data-key="section" data-value="Товары" class="meta"></span>
-<span data-key="page" data-value="Создать" class="meta"></span>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
 <div id="side_menu">
 	<section id="menu" class="menu open"></section>
 	<section id="submenu" class="submenu"></section>
@@ -56,7 +56,7 @@
 <section class="content">
 	<h1 id="page_title"></h1>
 
-<form id="send_form" data-url="getPath=products" data-method="POST" class="ui-widget">
+<form id="product_editor" data-remove="getPath=products" data-load="/products/editor/load" data-url="getPath=products" data-method="PUT" class="ui-widget">
 	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению</span>
 	<fieldset>
 		<label for="form_article">Артикул</label>
@@ -104,8 +104,8 @@
 		</select>
 	</fieldset>
 
-	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
-	<button type="reset" class="ui-button ui-corner-all ui-widget">Сбросить</button>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+	<button type="button" id="remove_product" class="ui-button ui-corner-all ui-widget">Удалить</button>
 
 	<br>
 	<span class="response"></span>

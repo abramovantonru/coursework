@@ -12,9 +12,10 @@ appProg/resources/
 
 dataBase/.idea/
 dataBase/node_modules/
-
-dataBase/build/
 dataBase/php/vendor/
 dataBase/php/composer.phar
+
+
+
 
 

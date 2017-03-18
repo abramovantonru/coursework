@@ -6,7 +6,8 @@ const
 	producers: '/producers',
 	products:{
 		main: '/products',
-		search: '/search'
+		search: '/search',
+		exist: '/exist'
 	}
 };
 
@@ -20,6 +21,9 @@ $(document).ready(function () {
 						Alert.init();
 						Form.init();
 						Order.init();
+
+						ProductEditor.init();
+						Utils.loadOpenEditor();
 					}
 				}
 			})(),
@@ -28,6 +32,81 @@ $(document).ready(function () {
 					i = 0, j = 0, k = 0,
 					length = 0;
 				return{
+					createStoresData: function ($selects, $inputs, stores, counts) {
+						console.log(stores);
+						length = stores.length;
+						if(length == counts.length){
+
+							for(i = 0; i < length; i++){
+								var _select = $selects.find('select').eq(0).clone();
+								_select.children('option').each(function (idx, element) {
+									if($(element).attr('value') == stores[i])
+										$(element).attr('selected', true);
+								});
+								$selects.prepend(_select[0].outerHTML);
+							}
+
+							length = counts.length;
+							for(i = 0; i < length; i++){
+								var _input = $inputs.find('input').eq(0).clone();
+								_input.attr('value', counts[i]);
+								$inputs.prepend(_input[0].outerHTML);
+							}
+						}
+					},
+					fillDataToForm: function($form, data){
+						if(typeof data === 'object')
+							for(i in data)
+								$form.find('[name="' + i + '"]').val(data[i]);
+					},
+					loadOpenEditor: function () {
+						var $openEditor = $('#open_editor');
+						if(!$openEditor.length) return false;
+
+						var path = $openEditor.attr('data-url');
+						if(path && path.length && path.indexOf('getPath') > -1){
+							path = Utils.secureGetPath(path);
+							if(path && path.length)
+								$openEditor.attr('data-url', path);
+							else
+								$openEditor.find('.response').html(Alert.error('Ошибка: не удалось определить ссылку формы!'));
+						}
+
+						$openEditor
+							.unbind('submit.exist')
+							.bind('submit.exist', function (e) {
+								e.preventDefault();
+								var
+									url = $(this).attr('data-url'),
+									method = $(this).attr('data-method'),
+									$response = $(this).find('.response'),
+									data = new FormData(this);
+
+								if(path && path.length)
+									$.ajax({
+										url: url,
+										method: method,
+										data: $(this).serialize(),
+										processData: false,
+										dataType: 'json',
+										cache: false,
+										beforeSend: function () {
+											$response.html('');
+										},
+										success: function (res) {
+											if(res.success && res.link)
+												window.location = res.link;
+											else if(res.error)
+												$response.html(Alert.error(res.error));
+										},
+										error: function (res) {
+											if(res.status && res.statusText && res.statusText.length)
+												$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
+										}
+									});
+								return false;
+							});
+					},
 					parseModuleNames: function (string) {
 						var modules = [];
 						try{
@@ -133,6 +212,179 @@ $(document).ready(function () {
 					}
 				}
 			})(),
+			ProductEditor = (function () {
+				var
+					$editor = undefined,
+					$removeBtn = undefined,
+					$response = undefined,
+					$magazine = undefined,
+					$counts = undefined;
+				return{
+					init: function () {
+						$editor = $('#product_editor');
+						$removeBtn = $('#remove_product');
+						$magazine = $('#form_magazine');
+
+						if(!$editor.length || !$removeBtn.length || !$magazine.length) return false;
+						$response = $editor.find('.response');
+						$counts = $('#form_counts');
+
+						ProductEditor.loadData();
+					},
+					events: function () {
+
+						$editor
+							.unbind('submit.updateProduct')
+							.bind('submit.updateProduct', function (e) {
+								e.preventDefault();
+
+								return false;
+							});
+
+						$removeBtn
+							.unbind('click.removeProduct')
+							.bind('click.removeProduct', function (e) {
+								e.preventDefault();
+								var
+									id = $(this).attr('data-id'),
+									res = confirm('Вы уверены, что хотите удалить товар?');
+								if(res){
+									var url_remove = Utils.secureGetPath($editor.attr('data-remove'));
+									if(url_remove && url_remove.length)
+										$.ajax({
+											url: url_remove,
+											method: 'DELETE',
+											data: $.param({id: id}),
+											processData: false,
+											dataType: 'json',
+											cache: false,
+											beforeSend: function () {
+												$response.html('');
+											},
+											success: function (res) {
+												console.log(res);
+												if(res.success){
+													alert('Товар успешно удален.');
+													window.location = '/';
+												}else
+													alert('Не удалось удалить товар, попробуйте еще раз.');
+											},
+											error: function (res) {
+
+											}
+										});
+								}
+								return false;
+							});
+
+						if($magazine.length) {
+							$('#form_magazine_add')
+								.unbind('click.add')
+								.bind('click.add', function (e) {
+									e.preventDefault();
+									var $clone = $magazine.find('select').first().clone();
+
+									$clone.find('option').each(function (idx, element) {
+										if(idx)
+											$(element).attr('selected', false);
+										else
+											$(element).attr('selected', true);
+									});
+									$(this).before($clone[0].outerHTML);
+									console.log($counts);
+									$clone = $counts.find('input').eq(0).clone();
+									$clone
+										.attr('value', '');
+									$counts.append($clone[0].outerHTML);
+
+									return false;
+								});
+
+							$('#form_magazine_remove')
+								.unbind('click.remove')
+								.bind('click.remove', function (e) {
+									e.preventDefault();
+									var
+										$elements = $magazine.find('select'),
+										idx = $elements.last().index();
+
+									if (idx) {
+										$elements.eq(idx).remove();
+										$elements = $counts.find('input');
+										$elements.eq(idx).remove();
+									} else {
+										$magazine.find('select').eq(0)
+											.val('');
+										$counts.find('input').eq(0)
+											.val('');
+									}
+
+									return false;
+								});
+						}
+					},
+					loadData: function () {
+						Utils.loadSelects($editor);
+
+						var queryString = Utils.queryString();
+						console.log(queryString);
+						if(queryString.id && queryString.id.length){
+							var
+								url = $($editor).attr('data-load'),
+								xhr = function () { return $.ajaxSettings.xhr(); };
+
+							$.ajax({
+								url: url,
+								method: 'GET',
+								data: $.param({id: queryString.id}),
+								processData: false,
+								dataType: 'json',
+								cache: false,
+								xhr: xhr,
+								beforeSend: function () {
+									$response.html('');
+								},
+								success: function (res) {
+									console.log(res);
+									if(res.success && res.item != false){
+										var
+											item = res.item,
+											stores = [],
+											counts = [];
+
+										if(item.stores){
+											stores = item.stores;
+											delete item.stores;
+										}
+										if(item.counts){
+											counts = item.counts;
+											delete item.counts;
+										}
+										
+										console.log(typeof counts);
+										
+										if(stores != [] && counts != []){
+											Utils.createStoresData(
+												$('#form_magazine'),
+												$('#form_counts'),
+												stores,
+												counts
+											);
+										}
+
+										Utils.fillDataToForm($editor, res.item);
+										$removeBtn.attr('data-id', res.item.id);
+										ProductEditor.events();
+									}
+								},
+								error: function (res) {
+
+								}
+							});
+						}
+					}
+				}
+			})(),
 			Alert = (function () {
 				var
 					$alerts = undefined,
@@ -193,6 +445,7 @@ $(document).ready(function () {
 					$form = undefined,
 					$response = undefined,
 					$progressBar = undefined,
+					$timepicker = undefined,
 
 					$enableBtn = undefined,
 
@@ -211,6 +464,7 @@ $(document).ready(function () {
 
 						$response = $form.find('.response');
 						$progressBar = $form.find('.progress_bar');
+						$timepicker = $form.find('.time_picker');
 
 						$enableBtn = $form.find('.form-enable');
 
@@ -230,7 +484,7 @@ $(document).ready(function () {
 
 						Form.events();
 						var init_url = $form.attr('data-init');
-						if(init_url.length){
+						if(init_url && init_url.length){
 							init_url = Utils.secureGetPath(init_url);
 							if(init_url)
 								Form.send($form, init_url);
@@ -293,6 +547,12 @@ $(document).ready(function () {
 									Form.enable();
 									return false;
 								});
+
+						if($timepicker.length)
+							$timepicker.datetimepicker({
+								datepicker: false,
+								format: 'H:i'
+							});
 
 						if($magazine.length){
 							$('#form_magazine_add')
@@ -538,9 +798,9 @@ $(document).ready(function () {
 							{name: 'Отчеты', link: '/orders.reviews.html'}
 						]},
 						{name: 'Товары', link: [
-							{name: 'Список', link: '/products.list.html'},
-							{name: 'Создать', link: '/products.create.html'},
-							{name: 'Редактировать', link: '/products.edit.html'}
+							{name: 'Список', link: '/products/list'},
+							{name: 'Создать', link: '/products/create'},
+							{name: 'Редактировать', link: '/products/edit'}
 						]},
 						{name: 'Магазины', link: [
 							{name: 'Список', link: '/stores.list.html'},

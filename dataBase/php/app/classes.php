@@ -94,7 +94,7 @@ class DB{
 		$db->connect();
 
 		//$sql = mysqli_real_escape_string($db->connection, $sql);
-		$result->data['sql'] = $sql;
+		//$result->data['sql'] = $sql;
 		if(!$res = $db->connection->query($sql))
 			$result->error = $db->connection->error;
 		else{
