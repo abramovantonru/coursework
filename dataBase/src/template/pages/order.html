@@ -1,0 +1,19 @@
+//= ../header.html
+<span data-key="section" data-value="Заказ" class="meta"></span>
+<span data-key="page" data-value="Оформление" class="meta"></span>
+//= ../core.html
+
+<form id="order_form" data-url="getPath=order,products" data-method="GET" class="ui-widget">
+	<fieldset>
+		<label for="store" class="required">Магазин</label>
+		<select id="store"  class="text ui-widget-content ui-corner-all producer" data-loadSelect="true" data-url="getPath=stores" required="required">
+			<option value="">Выберите магазин</option>
+		</select>
+	</fieldset>
+	<div id="items"></div>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
+	<button type="button" id="calc" class="ui-button ui-corner-all ui-widget">Пересчитать</button>
+	<span class="response"></span>
+</form>
+
+//= ../footer.html

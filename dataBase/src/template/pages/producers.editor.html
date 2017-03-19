@@ -1,20 +1,23 @@
 //= ../header.html
 <span data-key="section" data-value="Производители" class="meta"></span>
-<span data-key="page" data-value="Создать" class="meta"></span>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
 //= ../core.html
 
-<form id="send_form" data-url="getPath=producers" data-method="POST" class="ui-widget">
+<form id="product_editor" data-remove="getPath=producers" data-load="/producers/editor/load" data-url="getPath=producers" data-method="PUT" class="ui-widget">
 	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению.</span>
+	<span data-type="info" class="load-alert">Название должно быть уникально.</span>
 	<fieldset>
 		<label for="form_name" class="required">Название</label>
 		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
 
 		<label for="form_guarantee">Гарантия</label>
 		<input type="text" id="form_guarantee" placeholder="Гарантия (в днях)" name="guarantee" class="text ui-widget-content ui-corner-all only_integer">
+
+		<input name="id" type="hidden">
 	</fieldset>
 
-	<button type="submit" class="ui-button ui-corner-all ui-widget">Создать</button>
-	<button type="reset" class="ui-button ui-corner-all ui-widget">Сбросить</button>
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+	<button type="button" id="remove_product" class="ui-button ui-corner-all ui-widget">Удалить</button>
 
 	<br>
 	<span class="response"></span>

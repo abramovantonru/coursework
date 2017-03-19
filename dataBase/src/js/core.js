@@ -1,12 +1,28 @@
-console.time('main');
 const
-	title = 'Сеть мебельных магазинов',
+	title = 'Сеть мебельных магазинов "Теремок"',
 	paths = {
-	stores: '/stores',
-	producers: '/producers',
+	stores: {
+		main: '/stores',
+		search: '/search',
+		exist: '/exist'
+	},
+	producers: {
+		main: '/producers',
+		search: '/search',
+		exist: '/exist'
+	},
 	products:{
 		main: '/products',
 		search: '/search',
+		exist: '/exist'
+	},
+	order:{
+		main: '/order',
+		products: '/products',
+		print: {
+			main: '/print',
+			load: '/load'
+		},
 		exist: '/exist'
 	}
 };
@@ -22,8 +38,11 @@ $(document).ready(function () {
 						Form.init();
 						Order.init();
 
-						ProductEditor.init();
+						Editor.init();
 						Utils.loadOpenEditor();
+
+						if(Utils.checkPrint())
+							window.print();
 					}
 				}
 			})(),
@@ -32,8 +51,50 @@ $(document).ready(function () {
 					i = 0, j = 0, k = 0,
 					length = 0;
 				return{
+					loadPrint: function (id) {
+						var
+							$form = $('#print_form'),
+							$response = $form.find('.response'),
+							$items = $('#items');
+
+						$.ajax({
+							url: paths.order.main + paths.order.print.main + paths.order.print.load,
+							method: 'GET',
+							data: $.param({id: id}),
+							processData: false,
+							dataType: 'json',
+							cache: false,
+							beforeSend: function () {
+								$response.html('');
+							},
+							success: function (res) {
+								if(res.success && res.template){
+									$items.html($.parseHTML(res.template));
+									if(res.settings !== false)
+										for(i in res.settings)
+											$('[data-name="' + i + '"]').text(res.settings[i]);
+									$('#print').removeClass('hidden');
+									window.print();
+								}
+								else if(res.success && !res.template)
+									$response.html(Alert.error('Не удалось получить индентификатор о заказе!'));
+								else if(res.error)
+									$response.html(Alert.error(res.error));
+								else
+									$response.html(Alert.error('Неизвестный ответ сервера!'));
+							},
+							error: function (res) {
+								if(res.status && res.statusText && res.statusText.length)
+									$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
+							}
+						});
+					},
+					checkPrint: function () {
+						var queryString = Utils.queryString();
+						if((typeof queryString['id'] !== 'undefined') && parseInt(queryString['id']) > 0 && (typeof queryString['print'] !== 'undefined' && queryString['print'] == 'y'))
+							Utils.loadPrint(queryString['id']);
+					},
 					createStoresData: function ($selects, $inputs, stores, counts) {
-						console.log(stores);
 						length = stores.length;
 						if(length == counts.length){
 
@@ -152,6 +213,7 @@ $(document).ready(function () {
 
 						try {
 							var arr = string.split('=')[1].split(',');
+							console.log(arr);
 							response = Utils.getPath(arr);
 						}catch (e){
 							console.log(e);
@@ -212,32 +274,83 @@ $(document).ready(function () {
 					}
 				}
 			})(),
-			ProductEditor = (function () {
+			Editor = (function () {
 				var
 					$editor = undefined,
 					$removeBtn = undefined,
 					$response = undefined,
+					$progressBar = undefined,
+
 					$magazine = undefined,
 					$counts = undefined;
 				return{
 					init: function () {
 						$editor = $('#product_editor');
 						$removeBtn = $('#remove_product');
-						$magazine = $('#form_magazine');
 
-						if(!$editor.length || !$removeBtn.length || !$magazine.length) return false;
+						if(!$editor.length || !$removeBtn.length) return false;
+
 						$response = $editor.find('.response');
+						$progressBar = $editor.find('.progress_bar');
+						$magazine = $('#form_magazine');
 						$counts = $('#form_counts');
 
-						ProductEditor.loadData();
+						Editor.loadData();
 					},
 					events: function () {
-
 						$editor
 							.unbind('submit.updateProduct')
 							.bind('submit.updateProduct', function (e) {
 								e.preventDefault();
+								var
+									url = $(this).attr('data-url'),
+									method = $(this).attr('data-method'),
+									data = new FormData(this),
+									xhr = function () { return $.ajaxSettings.xhr(); };
 
+								if(url && url.length && url.indexOf('getPath') > -1){
+									url = Utils.secureGetPath(url);
+									if(url)
+										$(this).attr('data-url', url);
+								}
+
+								if($progressBar.length){
+									xhr = function(){
+										var xhr = $.ajaxSettings.xhr();
+										xhr.upload.addEventListener('progress', function(e){
+											if(e.lengthComputable) {
+												var progress = Math.ceil(e.loaded / e.total * 100);
+												$progressBar.progressbar('value', progress);
+											}
+										}, false);
+										return xhr;
+									};
+								}
+
+								$.ajax({
+									url: url,
+									method: method,
+									data: $(this).serialize(),
+									processData: false,
+									dataType: 'json',
+									cache: false,
+									xhr: xhr,
+									beforeSend: function () {
+										$response.html('');
+									},
+									success: function (res) {
+										if(res.success)
+											$response.html(Alert.success('Информация обновлена.'));
+										else if(res.error)
+											$response.html(Alert.error(res.error));
+										else
+											$response.html(Alert.error('Не удалось обновить информацию.'));
+									},
+									error: function (res) {
+										if(res.status && res.statusText && res.statusText.length)
+											$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
+									}
+								});
 								return false;
 							});
 
@@ -247,7 +360,7 @@ $(document).ready(function () {
 								e.preventDefault();
 								var
 									id = $(this).attr('data-id'),
-									res = confirm('Вы уверены, что хотите удалить товар?');
+									res = confirm('Вы уверены, что хотите удалить элемент?');
 								if(res){
 									var url_remove = Utils.secureGetPath($editor.attr('data-remove'));
 									if(url_remove && url_remove.length)
@@ -264,10 +377,10 @@ $(document).ready(function () {
 											success: function (res) {
 												console.log(res);
 												if(res.success){
-													alert('Товар успешно удален.');
+													alert('Элемент успешно удален.');
 													window.location = '/';
 												}else
-													alert('Не удалось удалить товар, попробуйте еще раз.');
+													alert('Не удалось удалить элемент, попробуйте еще раз.');
 											},
 											error: function (res) {
 
@@ -374,7 +487,7 @@ $(document).ready(function () {
 
 										Utils.fillDataToForm($editor, res.item);
 										$removeBtn.attr('data-id', res.item.id);
-										ProductEditor.events();
+										Editor.events();
 									}
 								},
 								error: function (res) {
@@ -632,9 +745,11 @@ $(document).ready(function () {
 							success: function (res) {
 								if(res.success && res.template)
 									$response.html($.parseHTML(res.template));
+								else if(res.success && res.message)
+									$response.html(Alert.success(res.message));
 
 								var modules = [];
-								if(moduleNames.length)
+								if(moduleNames && moduleNames.length)
 									modules = Utils.parseModuleNames(moduleNames);
 
 								if(modules.indexOf('order') > -1)
@@ -659,6 +774,9 @@ $(document).ready(function () {
 				var
 					_items = [],
 
+					$form = undefined,
+					$response = undefined,
+
 					$count = undefined,
 					$orderBtn = undefined,
 
@@ -668,9 +786,209 @@ $(document).ready(function () {
 					init: function () {
 						$count = $('#order_items_count');
 						$orderBtn = $('.order_btn');
-
+						
 						Order.set();
 						Order.events();
+
+						$form = $('#order_form');
+						if($form.length)
+							Order.form.init();
+					},
+					form:{
+						init: function () {
+							Utils.loadSelects($form);
+
+							$response = $form.find('.response');
+
+							var
+								$select = $('#store'),
+								$calc = $('#calc');
+
+							if($calc.length)
+								$calc
+									.unbind('click.calculating')
+									.bind('click.calculating', function (e) {
+										e.preventDefault();
+										Order.form.calculating();
+										return false;
+									});
+
+							if($select.length)
+								$select
+									.unbind('change.loadData')
+									.bind('change.loadData', function (e) {
+										e.preventDefault();
+										var id = $(this).val();
+										Order.form.load(id);
+										return false;
+									});
+
+							$form
+								.unbind('submit.createOrder')
+								.bind('submit.createOrder', function (e) {
+									e.preventDefault();
+									Order.form.create();
+									return false;
+								});
+						},
+						events: function () {
+							var
+								$cancel = $('.from_order'),
+								$collapse = $('.collapse_order'),
+								$counts = $form.find('.input-count');
+
+							$cancel.each(function (idx, element) {
+								Order.binder.from(element);
+							});
+
+							$collapse
+								.unbind('click.collapse')
+								.bind('click.collapse', function (e) {
+									e.preventDefault();
+									var
+										id = $(this).attr('data-id'),
+										$element = $form.find('.collapse[data-id="' + id + '"]');
+
+									if($element.hasClass('hidden')){
+										$element.removeClass('hidden');
+										$(this).text('Скрыть');
+									}
+									else{
+										$element.addClass('hidden');
+										$(this).text('Подробнее');
+									}
+
+									return false;
+								});
+
+							if($counts.length)
+								$counts
+									.unbind('change.calculating')
+									.bind('change.calculating', function (e) {
+										e.preventDefault();
+										Order.form.calc(this);
+										return false;
+									});
+						},
+						load: function (id) {
+							var 
+								url = $form.attr('data-url'),
+								method = $form.attr('data-method'),
+								data = {store: id, products: Order.get()};
+
+							if(url && url.length && url.indexOf('getPath') > -1){
+								url = Utils.secureGetPath(url);
+								if(url)
+									$form.attr('data-url', $form.attr('data-url'));
+							}
+							
+							$.ajax({
+								url: url,
+								method: method,
+								data: $.param(data),
+								processData: false,
+								dataType: 'json',
+								cache: false,
+								beforeSend: function () {
+									$response.html('');
+								},
+								success: function (res) {
+									if(res.success && res.template){
+										$('#items').html($.parseHTML(res.template));
+										Order.form.events();
+									}else if(res.error)
+										$response.html(Alert.error(res.error));
+									else
+										$response.html('Неизвестная ответ сервера');
+								},
+								error: function (res) {
+									if(res.status && res.statusText && res.statusText.length)
+										$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
+								}
+							});
+						},
+						create: function () {
+							var 
+								products = [],
+								counts = [];
+							
+							$('.item').each(function (idx, element) {
+								var 
+									id = $(element).attr('data-id'),
+									count = parseInt($form.find('.input-count[data-id="' + id + '"]').val());
+								if(count && !isNaN(count)){
+									products.push(id);
+									counts.push(count);
+								}
+							});
+
+							var store_id = parseInt($('#store').val());
+							if(!isNaN(store_id)){
+								if(products.length == counts.length && products.length > 0){
+									var data = {store: store_id, products: products, counts: counts};
+									$.ajax({
+										url: paths.order.main,
+										method: 'POST',
+										data: $.param(data),
+										processData: false,
+										dataType: 'json',
+										cache: false,
+										beforeSend: function () {
+											$response.html('');
+										},
+										success: function (res) {
+											if(res.success){
+												if(res.order_id){
+													Order.clear();
+													window.location = paths.order.main + paths.order.print + '?id=' + res.order_id + '&print=y';
+												}
+												else
+													$response.html(Alert.error('Не удалось получить индентификатор нового заказа!'));
+											}
+											else if(res.error)
+												$response.html(Alert.error(res.error));
+											else
+												$response.html(Alert.error('Неизвестный ответ сервера!'));
+										},
+										error: function (res) {
+											if(res.status && res.statusText && res.statusText.length)
+												$response.html(Alert.error('Ответ сервера: ' + res.statusText + ' [<b>' + res.status + '</b>]'));
+										}
+									});
+								}else
+									$response.html(Alert.error('Нет товаров для оформления заказа!'));
+							}else
+								$response.html(Alert.error('Не удалось определить магазин!'));
+						},
+						calc: function (that) {
+							var
+								id = $(that).attr('data-id'),
+								cost = parseFloat($form.find('.cost[data-id="' + id + '"]').text()),
+								count = parseInt($(that).val()),
+								sum = cost * count;
+							if(!isNaN(sum))
+								$form.find('.sum[data-id="' + id + '"]').text(parseFloat(sum.toFixed(2)));
+							else
+								$form.find('.sum[data-id="' + id + '"]').text('0');
+						},
+						calculating: function () {
+							var sum = 0,
+								$counts = $form.find('.input-count');
+
+							$counts.each(function (idx, element) {
+								var
+									id = $(element).attr('data-id'),
+									cost = parseFloat($form.find('.cost[data-id="' + id + '"]').text()),
+									count = parseInt($(element).val()),
+									_sum = cost * count;
+								if(!isNaN(_sum)){
+									sum += _sum;
+									$form.find('.sum[data-id="' + id + '"]').text(_sum);
+								}else $form.find('.sum[data-id="' + id + '"]').text('0');
+							});
+
+							$response.html(Alert.info('Итого на сумму: ' + parseFloat(sum.toFixed(2))));
+						}
 					},
 					events: function () {
 						if($orderBtn.length)
@@ -723,17 +1041,14 @@ $(document).ready(function () {
 					set: function (value) {
 						if(!value) {
 							var items = Storage.get('order');
-							if(items && items.length) {
+							if(items && items.length)
 								_items = items;
-							}
-							else{
+							else
 								_items = [];
-								Order.save();
-							}
-						}else{
+						}else
 							_items = value;
-							Order.save();
-						}
+
+						Order.save();
 					},
 					get: function () {
 						return _items;
@@ -791,28 +1106,21 @@ $(document).ready(function () {
 
 					items = [
 						{name: 'Заказ<span id="order_items_count" class="badge">0</span>', link: '/order'},
-						{name: 'Покупки', link: [
-							{name: 'Список', link: '/orders.list.html'},
-							{name: 'Создать', link: '/orders.create.html'},
-							{name: 'Редактировать', link: '/orders.edit.html'},
-							{name: 'Отчеты', link: '/orders.reviews.html'}
-						]},
+						{name: 'Покупки', link: '/orders'},
 						{name: 'Товары', link: [
 							{name: 'Список', link: '/products/list'},
 							{name: 'Создать', link: '/products/create'},
 							{name: 'Редактировать', link: '/products/edit'}
 						]},
 						{name: 'Магазины', link: [
-							{name: 'Список', link: '/stores.list.html'},
-							{name: 'Создать', link: '/stores.create.html'},
-							{name: 'Редактировать', link: '/stores.edit.html'},
-							{name: 'Отчеты', link: '/stores.reviews.html'}
+							{name: 'Список', link: '/stores/list'},
+							{name: 'Создать', link: '/stores/create'},
+							{name: 'Редактировать', link: '/stores/edit'}
 						]},
 						{name: 'Производители', link: [
-							{name: 'Список', link: '/stores.list.html'},
+							{name: 'Список', link: '/producers/list'},
 							{name: 'Создать', link: '/producers/create'},
-							{name: 'Редактировать', link: '/stores.edit.html'},
-							{name: 'Отчеты', link: '/stores.reviews.html'}
+							{name: 'Редактировать', link: '/producers/edit'}
 						]}
 					],
 					submenu = [],
@@ -987,8 +1295,5 @@ $(document).ready(function () {
 			})();
 
 		App.init();
-		console.log(Utils.queryString());
 	})();
 });
-
-console.timeEnd('main');

@@ -1,0 +1,14 @@
+//= ../header.html
+<span data-key="section" data-value="Продажи" class="meta"></span>
+<span data-key="page" data-value="Печать чека" class="meta"></span>
+//= ../core.html
+
+<form id="open_editor" data-url="getPath=order,exist" data-method="GET" class="ui-widget">
+	<fieldset>
+		<label for="form_exist_id"><button type="submit" class="ui-button ui-corner-all ui-widget">Открыть</button></label>
+		<input type="text" id="form_exist_id" name="id" placeholder="Введите ID необходимой продажи, чтобы открыть её для печати" class="text ui-widget-content ui-corner-all" required="required">
+	</fieldset>
+	<span class="response"></span>
+</form>
+
+//= ../footer.html

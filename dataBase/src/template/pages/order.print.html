@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang=ru>
+//= ../head_print.html
+<body>
+
+<style>
+	h1{
+		text-align: center;
+		font-size: 28px;
+		font-weight: bold;
+	}
+	table{
+		width: 80%;
+		margin: 0 auto;
+		border: 0;
+		overflow-x: auto;
+	}
+
+	table thead{
+		font-weight: bold;
+	}
+
+	table thead tr td{
+		border: 0;
+		text-align: center;
+	}
+
+	table tbody tr td{
+		border-bottom: 1px solid black;
+	}
+
+	table tbody tr td:nth-child(3),
+	table tbody tr td:nth-child(4)
+	{
+		text-align: center;
+	}
+
+	.hidden{
+		display: none;
+	}
+</style>
+<div id="print" class="hidden">
+	<h1>Чек магазина "<span data-name="store">Назание</span>"</h1>
+	<form id="print_form" data-url="getPath=order,print,load" data-method="GET" class="ui-widget">
+		<table>
+			<thead>
+			<tr>
+				<td>Артикул</td>
+				<td>Название</td>
+				<td>Количество</td>
+				<td>Стоимость</td>
+			</tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			</thead>
+			<tbody id="items">
+
+			<tfoot>
+			<tr>
+				<td></td>
+				<td></td>
+				<td style="text-align: right"><b>ИТОГО</b></td>
+				<td style="text-align: center"><span data-name="total">147141</span></td>
+			</tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			<tr>
+				<td style="text-align: right"><b>Дата и время</b></td>
+				<td colspan="3"><span data-name="datetime">Дата и время</span></td>
+			</tr>
+			<tr>
+				<td style="text-align: right"><b>Адрес</b></td>
+				<td colspan="3"><span data-name="address">Адрес</span></td>
+			</tr>
+			<tr>
+				<td style="text-align: right"><b>Телефон</b></td>
+				<td colspan="3"><span data-name="phone">Телефон</span></td>
+			</tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			<tr><td colspan="4">&nbsp;</td></tr>
+			<tr>
+				<td rowspan="5"><b>Администратор</b></td>
+				<td colspan="2"><span data-name="admin">Фамилия, Имя и Отчество</span></td>
+				<td style="border-bottom: 1px solid black"></td>
+			</tr>
+			</tfoot>
+		</table>
+
+		<span class="response"></span>
+	</form>
+</div>
+
+
+//= ../footer.html

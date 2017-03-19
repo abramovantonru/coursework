@@ -1,0 +1,37 @@
+//= ../header.html
+<span data-key="section" data-value="Товары" class="meta"></span>
+<span data-key="page" data-value="Редактировать" class="meta"></span>
+//= ../core.html
+
+<form id="product_editor" data-remove="getPath=stores" data-load="/stores/editor/load" data-url="getPath=stores" data-method="PUT" class="ui-widget">
+	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению.</span>
+	<fieldset>
+		<label for="form_name" class="required">Название</label>
+		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
+
+		<label for="form_admin" class="required">Администратор</label>
+		<input type="text" id="form_admin" placeholder="ФИО администратора" name="administrator" class="text ui-widget-content ui-corner-all" required="required">
+
+		<label for="form_address">Адрес</label>
+		<input type="text" id="form_address" placeholder="Адрес магазина (улица, строение/дом/корпус)" name="address" class="text ui-widget-content ui-corner-all">
+
+		<label for="form_phone">Телефон</label>
+		<input type="text" id="form_phone" placeholder="Введите телефон (макс. длина 15 символов)" name="phone" class="text ui-widget-content ui-corner-all">
+
+		<label for="form_start">Открытие</label>
+		<input type="text" id="form_start" placeholder="Введите начало рабочего дня в формате часы:минуты:секунда" name="start_time" class="text ui-widget-content ui-corner-all">
+
+		<label for="form_stop">Закрытие</label>
+		<input type="text" id="form_stop" placeholder="Введите конец рабочего дня в формате часы:минуты:секунда" name="stop_time" class="text ui-widget-content ui-corner-all">
+
+		<input name="id" type="hidden">
+	</fieldset>
+
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+	<button type="button" id="remove_product" class="ui-button ui-corner-all ui-widget">Удалить</button>
+
+	<br>
+	<span class="response"></span>
+</form>
+
+//= ../footer.html

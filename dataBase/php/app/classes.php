@@ -22,6 +22,7 @@ class DBResult{
 	public $empty = false; // empty marker
 	public $data = []; // for data in rows and cols (array)
 	public $error; // response error
+	public $insert_id; // last insert id
 }
 
 /**
@@ -60,7 +61,7 @@ class DB{
 		}
 	}
 
-	public static function exec($name, $params){
+	public static function exec($name, $params, $insert_id = false){
 		$db = new DB();
 		$result  = new DBResult();
 		$sql = 'CALL `' . $name . '`';
@@ -79,6 +80,10 @@ class DB{
 
 		if(!$result->success = $db->connection->query($sql))
 			$result->error = $db->connection->error;
+		else if($insert_id){
+			$_id = $db->connection->query('SELECT LAST_INSERT_ID() as insert_id LIMIT 1;')->fetch_assoc();
+			$result->insert_id = $_id['insert_id'];
+		}
 
 		$result->data['sql'] = $sql;
 
@@ -93,8 +98,6 @@ class DB{
 
 		$db->connect();
 
-		//$sql = mysqli_real_escape_string($db->connection, $sql);
-		//$result->data['sql'] = $sql;
 		if(!$res = $db->connection->query($sql))
 			$result->error = $db->connection->error;
 		else{
@@ -111,35 +114,19 @@ class DB{
 
 		return $result;
 	}
-
-	public static function update($sql){
-		$db = new DB();
-		$result = new DBResult();
-
-		$db->connect();
-
-		if(!$res = $db->connection->query($sql))
-			$db->error = $db->connection->error;
-		else
-			$result->success = true;
-
-		$db->disconnect();
-
-		return $result;
-	}
 }
 
 
 class Utils{
 	public static function clearSQL($string){
-		return self::clear2Quotes($string);
+		return self::clearQuotes(self::clear2Quotes($string));
 	}
 
 	public static function clear2Quotes($string){
 		return str_replace('"', '\"', $string);
 	}
 
-	/*public static function clearQuotes($string){
-		return str_replace("'", "\'", $string);
-	}*/
+	public static function clearQuotes($string){
+		return str_replace("'", "\\'", $string);
+	}
 }

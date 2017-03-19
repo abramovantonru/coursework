@@ -74,7 +74,7 @@ body{
 
 section.content{
 	padding: 10px;
-	width: 1200px;
+	width: 80%;
 	margin: 20px auto;
 	background: #fff;
 	border: 1px solid #e7e8ec;
@@ -246,16 +246,19 @@ input[disabled]:hover
 }
 
 .items .item .to_order,
-.items .item .from_order
+.items .item .from_order,
+.items .item .collapse_order
 {
 	float: right;
 	border: 3px dotted #337ab7;
 	padding: 0 10px 0 10px;
 	z-index: 5;
 	display: block;
+	margin-right: 10px;
 }
 .to_order:hover,
-.from_order:hover
+.from_order:hover,
+.collapse_order:hover
 {
 	opacity: .5;
 	color: red;
@@ -267,4 +270,36 @@ label[for=form_exist_id] {
 }
 #form_exist_id{
 	margin: 0;
+}
+
+
+.collapse.hidden{
+	display: none;
+}
+.collapse .table{
+	float: left;
+	width: 50%;
+}
+
+.collapse .table tr td{
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid #c5c5c5;
+	background-color: #f6f6f6;
+	color: #337ab7;
+	padding: 5px 20px;
+}
+
+.collapse .table tr td:nth-child(odd){
+	text-align: right;
+}
+
+.collapse input{
+	width: 100%;
+	margin: 0;
+}
+
+h1, h2{
+	color: #337ab7;
 }

@@ -28,7 +28,7 @@
 	<!--other-->
 </head>
 <body>
-<span data-key="section" data-value="Товары" class="meta"></span>
+<span data-key="section" data-value="Производители" class="meta"></span>
 <span data-key="page" data-value="Редактировать" class="meta"></span>
 <div id="side_menu">
 	<section id="menu" class="menu open"></section>
@@ -54,11 +54,23 @@
 <section class="content">
 	<h1 id="page_title"></h1>
 
-<form id="open_editor" data-url="getPath=products,exist" data-method="GET" class="ui-widget">
+<form id="product_editor" data-remove="getPath=producers" data-load="/producers/editor/load" data-url="getPath=producers" data-method="PUT" class="ui-widget">
+	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению.</span>
+	<span data-type="info" class="load-alert">Название должно быть уникально.</span>
 	<fieldset>
-		<label for="form_exist_id"><button type="submit" class="ui-button ui-corner-all ui-widget">Открыть</button></label>
-		<input type="text" id="form_exist_id" name="id" placeholder="Введите ID необходимого элемента, чтобы открыть его для редактирования" class="text ui-widget-content ui-corner-all" required="required">
+		<label for="form_name" class="required">Название</label>
+		<input type="text" id="form_name" placeholder="Название" name="name" class="text ui-widget-content ui-corner-all" required="required">
+
+		<label for="form_guarantee">Гарантия</label>
+		<input type="text" id="form_guarantee" placeholder="Гарантия (в днях)" name="guarantee" class="text ui-widget-content ui-corner-all only_integer">
+
+		<input name="id" type="hidden">
 	</fieldset>
+
+	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>
+	<button type="button" id="remove_product" class="ui-button ui-corner-all ui-widget">Удалить</button>
+
+	<br>
 	<span class="response"></span>
 </form>
 

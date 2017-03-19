@@ -4,7 +4,7 @@
 //= ../core.html
 
 <form id="product_editor" data-remove="getPath=products" data-load="/products/editor/load" data-url="getPath=products" data-method="PUT" class="ui-widget">
-	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению</span>
+	<span data-type="info" class="load-alert">Поля, отмеченные (<span class="text-red">*</span>) обязательны к заполнению.</span>
 	<fieldset>
 		<label for="form_article">Артикул</label>
 		<input type="text" id="form_article" placeholder="Артикул" name="article" class="text ui-widget-content ui-corner-all">
@@ -49,6 +49,8 @@
 		<select id="form_producer" name="producer" class="text ui-widget-content ui-corner-all" data-loadSelect="true" data-url="getPath=producers" required="required">
 			<option value="">Выберите производителя</option>
 		</select>
+
+		<input name="id" type="hidden">
 	</fieldset>
 
 	<button type="submit" class="ui-button ui-corner-all ui-widget">Сохранить</button>

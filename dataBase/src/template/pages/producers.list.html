@@ -1,0 +1,14 @@
+//= ../header.html
+<span data-key="section" data-value="Производители" class="meta"></span>
+<span data-key="page" data-value="Список" class="meta"></span>
+//= ../core.html
+
+<form id="send_form" data-init="getPath=producers" data-url="getPath=producers,search" data-method="GET" class="ui-widget">
+	<fieldset>
+		<label for="form_search"><button type="submit" class="ui-button ui-corner-all ui-widget">Поиск</button></label>
+		<input type="text" id="form_search" name="query" placeholder="Введите название производителя" class="text ui-widget-content ui-corner-all" required="required">
+	</fieldset>
+	<span class="response"></span>
+</form>
+
+//= ../footer.html
