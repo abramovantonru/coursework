@@ -1106,7 +1106,7 @@ $(document).ready(function () {
 
 					items = [
 						{name: 'Заказ<span id="order_items_count" class="badge">0</span>', link: '/order'},
-						{name: 'Покупки', link: '/orders'},
+						{name: 'Продажи', link: '/orders'},
 						{name: 'Товары', link: [
 							{name: 'Список', link: '/products/list'},
 							{name: 'Создать', link: '/products/create'},
