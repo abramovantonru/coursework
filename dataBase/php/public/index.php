@@ -10,7 +10,6 @@
  * - full work with database for client
  * - OOP style
  * - Slim (micro)Framework
- * -
  */
 
 use Slim\Views\PhpRenderer;

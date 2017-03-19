@@ -303,3 +303,9 @@ label[for=form_exist_id] {
 h1, h2{
 	color: #337ab7;
 }
+
+.index-image{
+	width: 100%;
+	height: auto;
+	display: block;
+}

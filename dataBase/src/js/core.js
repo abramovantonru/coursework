@@ -940,7 +940,7 @@ $(document).ready(function () {
 											if(res.success){
 												if(res.order_id){
 													Order.clear();
-													window.location = paths.order.main + paths.order.print + '?id=' + res.order_id + '&print=y';
+													window.location = paths.order.main + paths.order.print.main + '?id=' + res.order_id + '&print=y';
 												}
 												else
 													$response.html(Alert.error('Не удалось получить индентификатор нового заказа!'));
@@ -1253,26 +1253,27 @@ $(document).ready(function () {
 			SEO = (function () {
 				var
 					meta = undefined,
-					$meta = undefined,
-
-					length = 0,
-					i = 0, j =0, k = 0;
+					$meta = undefined;
 				return{
 					init: function () {
 						$meta = $('.meta');
 						
-						if(!$meta.length) return false;
-						meta = {};
-						
-						SEO.parseMeta(function () {
-							if(typeof meta['section'] !== 'undefined' && meta['section'].length)
-								window.section = meta['section'];
+						if($meta.length)
+							(function () {
+								meta = {};
 
-							if(typeof meta['page'] !== 'undefined' && meta['page'].length)
-								window.page = meta['page'];
+								SEO.parseMeta(function () {
+									if(typeof meta['section'] !== 'undefined' && meta['section'].length)
+										window.section = meta['section'];
 
+									if(typeof meta['page'] !== 'undefined' && meta['page'].length)
+										window.page = meta['page'];
+
+									SEO.setMeta();
+								});
+							})();
+						else
 							SEO.setMeta();
-						});
 					},
 					parseMeta: function (callback) {
 						$meta.each(function (idx, element) {
@@ -1287,9 +1288,16 @@ $(document).ready(function () {
 					},
 					setMeta: function () {
 						window.title = title;
-
 						$('#title').text(window.title);
-						$('#page_title').html(window.title + ': ' + window.section + ' > ' + window.page);
+
+						var page_title = window.title;
+						if(typeof window.section !== 'undefined' && typeof window.page !== 'undefined')
+							page_title += ': ' + window.section + ' > ' + window.page;
+						else if(typeof window.section !== 'undefined')
+							page_title += ': ' + window.section;
+						else if(typeof window.page !== 'undefined')
+							page_title += ': ' + window.page;
+						$('#page_title').html(page_title);
 					}
 				}
 			})();

@@ -13,6 +13,10 @@ $app->get('/', function ($request, $response, $arguments) {
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
 });
 
+/*
+ * Products
+ */
+
 /**
  * List of products by GET
  */
@@ -39,6 +43,9 @@ $app->get('/products', function ($request, $response) {
 	], 200);
 });
 
+/**
+ * Render page with form for search product by GET
+ */
 $app->get('/products/list', function ($request, $response, $arguments) {
 	return $this->renderer->render($response, '/products.list.html', $arguments)
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
@@ -97,6 +104,9 @@ $app->get('/products/editor', function ($request, $response, $arguments) {
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
 });
 
+/**
+ * Load data about product by id in GET
+ */
 $app->get('/products/editor/load', function ($request, $response, $arguments) {
 	$id = $request->getParam('id');
 	if($id != null && !empty($id))
@@ -222,7 +232,7 @@ $app->post('/products', function ($request, $response) {
 });
 
 /**
- * Update info about product by PUT
+ * Update info about product by id in PUT
  */
 $app->put('/products', function ($request, $response)  {
 	$put = $request->getParsedBody(); //parse PUT data
@@ -299,6 +309,10 @@ $app->delete('/products', function ($request, $response)  {
 	], 200);
 });
 
+/*
+ * Producers
+ */
+
 /**
  * List of producers by GET
  */
@@ -362,6 +376,9 @@ $app->post('/producers', function ($request, $response) {
 	], 200);
 });
 
+/**
+ * Render page with form for search producers by GET
+ */
 $app->get('/producers/list', function ($request, $response, $arguments) {
 	return $this->renderer->render($response, '/producers.list.html', $arguments)
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
@@ -410,7 +427,7 @@ $app->get('/producers/edit', function ($request, $response, $arguments) {
 });
 
 /**
- * Render page with form for update store by PUT
+ * Render page with form for update producer by PUT
  */
 $app->get('/producers/editor', function ($request, $response, $arguments) {
 	return $this->renderer->render($response, '/producers.editor.html', $arguments)
@@ -451,7 +468,7 @@ $app->get('/producers/editor/load', function ($request, $response, $arguments) {
 });
 
 /**
- * Update info about store by PUT
+ * Update info about store by id in PUT
  */
 $app->put('/producers', function ($request, $response)  {
 	$put = $request->getParsedBody(); //parse PUT data}
@@ -494,6 +511,10 @@ $app->delete('/producers', function ($request, $response)  {
 		'error' => isset($error) ? $error : false
 	], 200);
 });
+
+/*
+ * Stores
+ */
 
 /**
  * List of stores by GET
@@ -636,6 +657,9 @@ $app->get('/stores/exist', function ($request, $response, $arguments) {
 	], 200);
 });
 
+/**
+ * Load data about store by id in GET
+ */
 $app->get('/stores/editor/load', function ($request, $response, $arguments) {
 	$id = $request->getParam('id');
 	if($id != null && !empty($id))
@@ -653,7 +677,7 @@ $app->get('/stores/editor/load', function ($request, $response, $arguments) {
 });
 
 /**
- * Update info about store by PUT
+ * Update info about store by id in PUT
  */
 $app->put('/stores', function ($request, $response)  {
 	$put = $request->getParsedBody(); //parse PUT data}
@@ -702,16 +726,13 @@ $app->delete('/stores', function ($request, $response)  {
 	], 200);
 });
 
-/**
- * Check connection with MySQL database
+/*
+ * Order (check)
  */
-$app->get('/db/connection/ping', function ($request, $response) {
-	$res = DB::ping();
-	return $response->withJson([
-		'success' => isset($res) && $res->success ? $res->success : false,
-	], 200);
-});
 
+/**
+ * Load products list by products array and store_id in GET
+ */
 $app->get('/order/products', function ($request, $response) {
 	$products = $request->getParam('products');
 	$store = $request->getParam('store');
@@ -783,13 +804,16 @@ $app->get('/order/products', function ($request, $response) {
 	], 200);
 });
 
+/**
+ * Render page with form for create order by POST
+ */
 $app->get('/order', function ($request, $response, $arguments) {
 	return $this->renderer->render($response, '/order.html', $arguments)
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
 });
 
 /**
- * Render page with form for check store by GET
+ * Render page with form for check orders by GET
  */
 $app->get('/orders', function ($request, $response, $arguments) {
 	return $this->renderer->render($response, '/orders.html', $arguments)
@@ -797,7 +821,7 @@ $app->get('/orders', function ($request, $response, $arguments) {
 });
 
 /**
- * Check exist store by id in GET
+ * Check exist order by id in GET
  */
 $app->get('/order/exist', function ($request, $response, $arguments) {
 	$id = $request->getParam('id');
@@ -903,11 +927,17 @@ $app->post('/order', function ($request, $response) {
 	], 200);
 });
 
+/**
+ * Render page with template for PDF Browser Print
+ */
 $app->get('/order/print', function ($request, $response) {
 	return $this->renderer->render($response, '/order.print.html', [])
 		->withHeader('Content-Type', CONTENT_TYPE_HTML);
 });
 
+/**
+ * Load data abut order by id in GET
+ */
 $app->get('/order/print/load', function ($request, $response) {
 	$id = (int)$request->getParam('id');
 
@@ -964,5 +994,19 @@ $app->get('/order/print/load', function ($request, $response) {
 		'$_res' => isset($_res) ? $_res : false,
 		'template' => isset($html) ? $html : false,
 		'settings' => isset($settings) ? $settings : false
+	], 200);
+});
+
+/*
+ * Other
+ */
+
+/**
+ * Check connection with MySQL database
+ */
+$app->get('/db/connection/ping', function ($request, $response) {
+	$res = DB::ping();
+	return $response->withJson([
+		'success' => isset($res) && $res->success ? $res->success : false,
 	], 200);
 });

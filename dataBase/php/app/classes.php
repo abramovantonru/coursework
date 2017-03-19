@@ -1,16 +1,7 @@
 <?
 /**
  * Abramov Anton 2017
- *
- * Application for connect client-side and database.
- * It's API service with GET, POST, PUT, DELETE methods (REST).
- *
- * Features:
- * - support all methods
- * - full work with database for client
- * - OOP style
- * - Slim (micro)Framework
- * -
+ * Classes
  */
 
 /**
@@ -39,6 +30,13 @@ class DB{
 	private $connection; // mysqli connection
 	private $error; // for error of connection
 
+	/**
+	 * DB constructor.
+	 * @param string $_host
+	 * @param string $_db
+	 * @param string $_user
+	 * @param string $_password
+	 */
 	function __construct($_host = DB_HOST, $_db = DB_NAME, $_user = DB_USER, $_password = DB_PASSWORD){
 		$this->host = $_host;
 		$this->database = $_db;
@@ -46,6 +44,9 @@ class DB{
 		$this->password = $_password;
 	}
 
+	/**
+	 * Open connection with database
+	 */
 	private function connect(){
 		$this->connection = new mysqli($this->host, $this->user, $this->password, $this->database);
 
@@ -53,6 +54,9 @@ class DB{
 			$this->error = 'Connect Error (' . $this->connection->connect_errno . ') ' . $this->connection->connect_error;
 	}
 
+	/**
+	 * Close connection with database
+	 */
 	private function disconnect(){
 		try{
 			$this->connection->close();
@@ -61,6 +65,13 @@ class DB{
 		}
 	}
 
+	/**
+	 * Wrapper for execute procedure of database
+	 * @param $name
+	 * @param $params
+	 * @param bool $insert_id
+	 * @return DBResult
+	 */
 	public static function exec($name, $params, $insert_id = false){
 		$db = new DB();
 		$result  = new DBResult();
@@ -92,6 +103,11 @@ class DB{
 		return $result;
 	}
 
+	/**
+	 * Wrapper for get data from database
+	 * @param $sql
+	 * @return DBResult
+	 */
 	public static function get($sql){
 		$db = new DB();
 		$result = new DBResult();
@@ -116,8 +132,16 @@ class DB{
 	}
 }
 
-
+/**
+ * Class Utils
+ * Different utils
+ */
 class Utils{
+	/**
+	 * Replace symbols in SQL query string
+	 * @param $string
+	 * @return mixed
+	 */
 	public static function clearSQL($string){
 		return self::clearQuotes(self::clear2Quotes($string));
 	}
