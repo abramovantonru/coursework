@@ -898,8 +898,10 @@ $(document).ready(function () {
 										Order.form.events();
 									}else if(res.error)
 										$response.html(Alert.error(res.error));
+									else if(typeof res.res !== 'undefined' && res.res.empty)
+										$response.html(Alert.error('Элементы не найдены'));
 									else
-										$response.html('Неизвестный ответ сервера');
+										$response.html(Alert.error('Неизвестный ответ сервера'));
 								},
 								error: function (res) {
 									if(res.status && res.statusText && res.statusText.length)
