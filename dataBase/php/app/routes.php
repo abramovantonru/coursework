@@ -500,6 +500,16 @@ $app->delete('/producers', function ($request, $response)  {
 		$check = DB::get("SELECT * FROM `producer` WHERE id = " . $delete['id'] . " AND active = 1;");
 
 	if(isset($check)){
+		$sql = "SELECT id FROM `product` WHERE producer = " . $delete['id'] . " ;";
+		$_res = DB::get($sql);
+
+		if($_res->success && !empty($_res->data))
+			foreach ($_res->data as $idx => $item)
+				if(isset($item) && !empty($item) && is_array($item))
+					DB::exec('product.delete', [
+						$item['id']
+					]);
+
 		$success = DB::exec('producer.delete', [
 			$delete['id']
 		])->success;
@@ -714,6 +724,42 @@ $app->delete('/stores', function ($request, $response)  {
 		$check = DB::get("SELECT * FROM `store` WHERE id = " . $delete['id'] . " AND active = 1;");
 
 	if(isset($check)){
+		$sql = "SELECT id, stores" .
+			" FROM `product`" .
+			" WHERE JSON_KEYS(JSON_EXTRACT(stores, '$[0]')) LIKE '%\"" . $delete['id'] . "\"%'";
+
+		$_res = DB::get($sql);
+		if($_res->success && !empty($_res->data)){
+			foreach ($_res->data as $idx => $item){
+				if(isset($item) && !empty($item) && is_array($item)){
+					$id = $item['id'];
+					$stores = json_decode($item['stores'])[0];
+					$stores = (array)$stores;
+
+					$keys = array_keys($stores);
+					$values = array_values($stores);
+					$skip_index = -1;
+					$new_counts = [];
+					foreach ($keys as $i => $k){
+						$new_counts[] = $values[$i];
+						if($k == $delete['id'])
+							$skip_index = $i;
+					}
+
+					$new_stores = [];
+					foreach ($keys as $i => $key)
+						if($i != $skip_index)
+							$new_stores[$key] = $new_counts[$i];
+					$new_stores = [$new_stores];
+
+					DB::exec('product.update_counts', [
+						json_encode($new_stores),
+						$id
+					]);
+				}
+			}
+		}
+
 		$success = DB::exec('store.delete', [
 			$delete['id']
 		])->success;
@@ -743,14 +789,14 @@ $app->get('/order/products', function ($request, $response) {
 				" (SELECT name FROM `producer` WHERE id = producer) AS producer" .
 				" FROM `product`" .
 				" WHERE JSON_KEYS(JSON_EXTRACT(stores, '$[0]')) LIKE '%\"" . $store . "\"%'" .
-				" AND ";
+				" AND ( ";
 
 			$_products = [];
 			foreach ($products as $id)
 				$_products[] = ' id = ' . $id;
 			$sql .= implode(' OR ', $_products);
 
-			$res = DB::get($sql);
+			$res = DB::get($sql . ' )');
 
 			if(!$res->empty){
 				$html = '<div class="items">';
@@ -766,7 +812,7 @@ $app->get('/order/products', function ($request, $response) {
 						}
 					}
 
-					$html .= '<a class="item item-collapse" data-id="' . $item['id'] . '" href="#">' . $item['name'] .
+					$html .= '<a class="item item-collapse" data-id="' . $item['id'] . '" href="/products/editor?id=' . $item['id'] . '">' . $item['name'] .
 					'<span data-id="' . $item['id'] . '" class="from_order">Отмена</span>' .
 					'<span data-id="' . $item['id'] . '" class="collapse_order">Подробнее</span></a>' .
 					'<div data-id="' . $item['id'] . '" class="collapse hidden">'.

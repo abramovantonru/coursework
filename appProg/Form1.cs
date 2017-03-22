@@ -104,6 +104,7 @@ namespace appProg
 				width / 2,
 				height / 2 + 10
 			);
+			this.btnOpenOrder.Height = 30;
 			this.btnCreateOrder.Location = new Point(
 				btnOpenOrder.Bounds.Right + 10,
 				height / 2 + 10
@@ -125,7 +126,7 @@ namespace appProg
 			 * */
 			menuSections = DB.getMenuSections(); // get all exist sections
 			createTabs(menuSections); // create tabs by found sections
-			
+
 			loadTabDishes(0); // fill data to first tab
 
 		}
@@ -141,6 +142,8 @@ namespace appProg
 			Left = Top = 0;
 			Width = Screen.PrimaryScreen.Bounds.Width;
 			Height = Screen.PrimaryScreen.Bounds.Height;
+
+			PDFGenerator pdf = new PDFGenerator();
 		}
 		/**
 		 * Func(wrapper) for load data from DB and fill to menu
@@ -161,7 +164,7 @@ namespace appProg
 			int menuWidth = this.menu.Width;
 			int countSections = sections.Count();
 			menuTables = new DataGridView[sections.Count];
-			
+
 			menuColumn[] columns = {
 				new menuColumn { name = "id", header = "ИД", width = menuWidth / 100 * 5 },
 				new menuColumn { name = "name", header = "Название", width = menuWidth / 100 * 65  - 40},
@@ -169,7 +172,7 @@ namespace appProg
 				new menuColumn { name = "cost", header = "Стоимость, руб.", width = menuWidth / 100 * 15 },
 			};
 			int countColumns = columns.Count();
-			
+
 			for (int i = 0; i < countSections; i++)
 			{
 
@@ -214,7 +217,7 @@ namespace appProg
 				var tab = menu.SelectedIndex;
 				int id = (int)menuTables[tab].Rows[row].Cells[0].Value;
 				if (id > 0)
-					if(selectedDish == null || selectedDish.id != id)
+					if (selectedDish == null || selectedDish.id != id)
 						showDetailDish(id);
 			}
 		}
@@ -229,14 +232,14 @@ namespace appProg
 			int width = dishDetail.Width;
 			int height = dishDetail.Height;
 
-			List<string> tabs = new List<string>{ "Основная информация", "Картинки" };
+			List<string> tabs = new List<string> { "Основная информация", "Картинки" };
 			menuColumn[] columns = {
 				new menuColumn { name = "key", header = "Параметр", width = width / 200 * 60 },
-				new menuColumn { name = "unit", header = "Единица", width = width / 200 * 30},
-				new menuColumn { name = "value", header = "Значение", width = width / 200 * 30},
+				new menuColumn { name = "unit", header = "Единица", width = width / 200 * 20},
+				new menuColumn { name = "value", header = "Значение", width = width / 200 * 20},
 			};
 			int countColumns = columns.Count();
-	
+
 			TabPage mainTab = new TabPage("Основная информация");
 			TabPage imageTab = null;
 			DataGridView detailDishTable = new DataGridView();
@@ -250,6 +253,8 @@ namespace appProg
 			detailDishTable.RowHeadersVisible = false;
 			detailDishTable.ScrollBars = ScrollBars.Vertical;
 			detailDishTable.BackgroundColor = Color.White;
+			detailDishTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+			detailDishTable.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
 			for (int j = 0; j < countColumns; j++)
 			{
@@ -283,7 +288,7 @@ namespace appProg
 				row.SetValues(new object[] { key, unit, _row.Value });
 			}
 			detailDishTable.ColumnHeadersHeight = rowHeight; // fix dish table headers  height
-			// fix dish table params height
+															 // fix dish table params height
 			detailDishTable.Height = detailDishTable.Rows.GetRowsHeight(DataGridViewElementStates.Displayed) + rowHeight;
 
 			// crate label for dish name
@@ -295,9 +300,9 @@ namespace appProg
 			);
 			name.Font = new Font("Calibri", 24, FontStyle.Bold);
 			name.Height = name.Font.Height;
-			
+
 			// images exist
-			if(dish.images.Any()) {
+			if (dish.images.Any()) {
 				PictureBox image = new PictureBox();
 				image.Image = dish.images[0];
 				image.Height = height / 2;
@@ -310,15 +315,15 @@ namespace appProg
 
 				mainTab.Controls.Add(image);
 				int countDishImages = dish.images.Count();
-				if (countDishImages > 1) {				
+				if (countDishImages > 1) {
 					Gallery gallery = new Gallery(dish.images, width, height);
-				
+
 					imageTab = new TabPage("Картинки");
 					imageTab.Controls.Add(gallery);
 					imageTab.BackColor = Color.White;
 				}
-			// no images
-			}else {
+				// no images
+			} else {
 				// set default image from app resources
 				PictureBox image = new PictureBox();
 
@@ -335,7 +340,7 @@ namespace appProg
 			mainTab.Controls.Add(name);
 			mainTab.Controls.Add(detailDishTable);
 			this.dishDetail.TabPages.Add(mainTab);
-			if(imageTab != null)
+			if (imageTab != null)
 				this.dishDetail.TabPages.Add(imageTab);
 			if (selectedDish == null)
 			{
@@ -360,7 +365,7 @@ namespace appProg
 		 * */
 		public static void showDetailImage(Image img, string dishName)
 		{
-			if(img != null) {
+			if (img != null) {
 				detailImageWindow = new Form();
 				PictureBox image = new PictureBox();
 
@@ -384,7 +389,7 @@ namespace appProg
 		/**
 		 * Order logic
 		 * */
-		 //event handler for create order
+		//event handler for create order
 		private void createOrder_Click(object sender, EventArgs e)
 		{
 			int idx = createOrder();
@@ -411,11 +416,11 @@ namespace appProg
 			int index = order.SelectedIndex;
 			if (index > -1) {
 				int id = saveOrder(index);
-				if (id == 0) 
+				if (id == 0)
 					MessageBox.Show("Заказ успешно сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-				else if(id == -1)
+				else if (id == -1)
 					MessageBox.Show("Не удалось сохранить заказ!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				else if(id > -1) {
+				else if (id > -1) {
 					MessageBox.Show("Заказ успешно сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					orders[index].name = "Заказ №" + id;
 					loadOrdersTabs();
@@ -427,16 +432,16 @@ namespace appProg
 			int id = -1;
 			int orderID = orderIDbyIdx(index);
 
-			if(orderID != -1) {
+			if (orderID != -1) {
 				string json = getSerializeOrderItems(index);
-				if(json != "[]")
+				if (json != "[]")
 					if (!DB.existOrderByID(orderID))
 						id = DB.insertOrder(json);
 					else
 						if (DB.updateOrder(orderID, json))
-							id = 0;
-						else
-							id = -1;
+						id = 0;
+					else
+						id = -1;
 				else MessageBox.Show("Невозможно сохранить пустой заказ!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 
@@ -446,7 +451,7 @@ namespace appProg
 		private void removeOrder_Click(object sender, EventArgs e)
 		{
 			int index = order.SelectedIndex;
-			if(index > -1 && orders[index] != null) {
+			if (index > -1 && orders[index] != null) {
 				if (orders[index].name == "Новый заказ")
 					orders.RemoveAt(index);
 				else {
@@ -464,7 +469,7 @@ namespace appProg
 		private void closeOrder_Click(object sender, EventArgs e)
 		{
 			int index = order.SelectedIndex;
-			if(index != -1) {
+			if (index != -1) {
 				orders.RemoveAt(index);
 				loadOrdersTabs();
 
@@ -477,11 +482,11 @@ namespace appProg
 
 		private int findOrderDishIdxByDishID(int orderIdx, int id) {
 			int idx = -1;
-			
-			if(orderIdx != -1) {
+
+			if (orderIdx != -1) {
 				int count = orders[orderIdx].dishes.Count;
-				for (int i = 0; i < count; i++){
-					if (orders[orderIdx].dishes[i].id == id){
+				for (int i = 0; i < count; i++) {
+					if (orders[orderIdx].dishes[i].id == id) {
 						idx = i;
 						break;
 					}
@@ -494,25 +499,25 @@ namespace appProg
 		private int findOrderIdxByOrderID(int id) {
 			int idx = -1;
 			int count = orders.Count;
-			
-			for (int i = 0; i < count; i++){
-				if (orders[i].id == id){
+
+			for (int i = 0; i < count; i++) {
+				if (orders[i].id == id) {
 					idx = i;
 					break;
 				}
 			}
-		
+
 			return idx;
 		}
 
-		private int findOrderIdxByDishID(int id){
+		private int findOrderIdxByDishID(int id) {
 			int idx = -1;
 			int countOrder = orders.Count;
-		
-			for (int i = 0; i < countOrder; i++){
+
+			for (int i = 0; i < countOrder; i++) {
 				int countDishes = orders[i].dishes.Count;
-				for (int j = 0; j < countDishes; j++){
-					if (orders[i].dishes[j].id == id){
+				for (int j = 0; j < countDishes; j++) {
+					if (orders[i].dishes[j].id == id) {
 						idx = i;
 						break;
 					}
@@ -532,11 +537,11 @@ namespace appProg
 		}
 
 		private void addDishToOrder(int id, string name, float cost, int count, int orderIdx = -1) {
-			if(orderIdx == -1) {
+			if (orderIdx == -1) {
 				orderIdx = createOrder();
 				orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
 				loadOrdersTabs();
-			}else {
+			} else {
 				int dishIdx = findOrderDishIdxByDishID(orderIdx, id);
 				if (dishIdx == -1)
 					orders[orderIdx].dishes.Add(new dishInOrder { id = id, name = name, cost = cost, count = count });
@@ -547,7 +552,7 @@ namespace appProg
 			}
 		}
 
-		private void loadOrderTabDishes(int idx){
+		private void loadOrderTabDishes(int idx) {
 			if (idx != -1 && orders.Any())
 			{
 				orderTables[idx].Rows.Clear();
@@ -581,6 +586,11 @@ namespace appProg
 				orderTables[i].Height = orderHeight;
 				orderTables[i].Width = orderWidth;
 				orderTables[i].RowHeadersVisible = false;
+				orderTables[i].AllowUserToResizeRows = false;
+				orderTables[i].AllowUserToResizeColumns = false;
+				orderTables[i].SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+				orderTables[i].RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+				orderTables[i].ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 				orderTables[i].ScrollBars = ScrollBars.Vertical;
 				orderTables[i].ReadOnly = true;
 				orderTables[i].AllowUserToAddRows = false;
@@ -599,11 +609,11 @@ namespace appProg
 				this.order.TabPages.Add(tabPage);
 			}
 
-			if(orders.Any()) {
-				for(int i = 0; i < countOrders; i++) {
+			if (orders.Any()) {
+				for (int i = 0; i < countOrders; i++) {
 					loadOrderTabDishes(i);
 				}
-			}			
+			}
 		}
 
 		private void orderTableCell_Click(object sender, DataGridViewCellEventArgs e)
@@ -618,7 +628,7 @@ namespace appProg
 						showDetailDish(id);
 			}
 		}
-		
+
 		private void addToOrder_Click(object sender, EventArgs e)
 		{
 			int count = Convert.ToInt32(countOfDetailDish.Text);
@@ -636,7 +646,7 @@ namespace appProg
 		private void IncCountDish_Click(object sender, EventArgs e)
 		{
 			int count = getCountOfSelectedDish();
-			if(count < 100)
+			if (count < 100)
 				count++;
 			setCountOfSelectedDish(getCountOfSelectedDish() + 1);
 		}
@@ -659,12 +669,9 @@ namespace appProg
 			foreach (var dish in orders[orderIdx].dishes)
 				_dish.Add(JsonConvert.SerializeObject(new Dictionary<int, int>() { { dish.id, dish.count } }));
 
-			if(_dish.Any())
+			if (_dish.Any())
 				json += String.Join(", ", _dish);
-			/*
-				List<Foo> arr = new List<Foo>(dict.Values);
-				Foo[] arr = (new List<Foo>(dict.Values)).ToArray();
-			 */
+
 			return "[" + json + "]";
 		}
 
@@ -699,13 +706,13 @@ namespace appProg
 			OK.Click += (s, ev) => {
 				int id = Convert.ToInt32(input.Text);
 				if (DB.existOrderByID(id)) {
-					if(findOrderIdxByOrderID(id) == -1) {
+					if (findOrderIdxByOrderID(id) == -1) {
 						int selectedIdx = openOrder(id);
 						openOrderDialog.Close();
 						loadOrdersTabs();
 						if (selectedIdx != -1)
 							order.SelectedIndex = selectedIdx;
-					}else {
+					} else {
 						MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					}
 				}
@@ -769,7 +776,7 @@ namespace appProg
 			info.Width = w;
 			info.Location = new Point(
 				w / 2 - info.PreferredWidth / 2,
-				h /2 - info.Height * 2
+				h / 2 - info.Height * 2
 			);
 
 			OK.Width = Cancel.Width = 60;
@@ -786,7 +793,7 @@ namespace appProg
 						orders.RemoveAt(idx);
 						MessageBox.Show("Заказ с данным номером (" + id + ") успешно удален.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 						loadOrdersTabs();
-					}	
+					}
 					else MessageBox.Show("Не удалось удалить заказ №" + id + "!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
 				}
 				else MessageBox.Show("Заказ с данным номером (" + id + ") не найден.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -807,6 +814,11 @@ namespace appProg
 
 			removeOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, info });
 			removeOrderDialog.Show();
+		}
+
+		private void menuStrip_closeApp_Click(object sender, EventArgs e)
+		{
+			this.Close();
 		}
 	}
 	/**
@@ -847,7 +859,7 @@ namespace appProg
 
 			this.CreateGallery(images);
 		}
-		
+
 		private void DrawPictureBox(Image img)
 		{
 			PictureBox image = new PictureBox();
@@ -856,9 +868,9 @@ namespace appProg
 			if (onLine == maxCount) {
 				onLine = 0;
 				xPos = margin;
-				yPos += imgWidth + padding; 
+				yPos += imgWidth + padding;
 			}
-			
+
 			//image settings
 			image.Image = img;
 			image.Width = image.Height = imgWidth;
@@ -881,7 +893,7 @@ namespace appProg
 			RemoveControls();
 			int count = images.Count;
 
-			for(int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 				DrawPictureBox(images.ElementAt(i));
 		}
 
@@ -963,11 +975,11 @@ namespace appProg
 		private static string host = "127.0.0.1";
 		private static string user = "mysql";
 		private static string password = "mysql";
-		private static Dictionary<string, string> tables = 
+		private static Dictionary<string, string> tables =
 			new Dictionary<string, string>()
 			{
-				{ "dishes",		"dish" },
-				{ "images",		"images"},
+				{ "dishes",     "dish" },
+				{ "images",     "images"},
 				{ "order",      "`order`"}
 			};
 		private MySqlConnection connection;
@@ -993,7 +1005,7 @@ namespace appProg
 			if (result.success)
 			{
 				int rows = result.data.Count();
-				for(int i = 0; i < rows; i++)
+				for (int i = 0; i < rows; i++)
 					sections.Add(result.data[i][0].ToString());
 			}
 
@@ -1084,12 +1096,12 @@ namespace appProg
 			{
 				List<int> _images = new List<int>();
 				var row = result.data[0];
-				
+
 				var name = row[1].ToString();
 				var type = row[2].ToString();
 				var images = new List<Image>();
 				Console.WriteLine(row[3]);
-				if(row[3] != DBNull.Value) {
+				if (row[3] != DBNull.Value) {
 					try
 					{
 						_images = JsonConvert.DeserializeObject<List<int>>(row[3].ToString());
@@ -1105,7 +1117,7 @@ namespace appProg
 						MessageBox.Show("Не удалось получить данные о изображениях блюда", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
 				}
-				
+
 				var description = row[4].ToString();
 				var weight = (float)row[5];
 				var proteins = (float)row[6];
@@ -1114,7 +1126,7 @@ namespace appProg
 				var energy = (int)row[9];
 				var cost = (float)row[10];
 
-				dish = new detailDish { 
+				dish = new detailDish {
 					id = id, name = name, images = images,
 					proteins = proteins, fats = fats, carbohydrates = carbohydrates,
 					type = type, weight = weight, energy = energy, cost = cost
@@ -1153,7 +1165,7 @@ namespace appProg
 			return result;
 		}
 
-		public static int insertOrder(string json) 
+		public static int insertOrder(string json)
 		{
 			int insertID = -1;
 
@@ -1186,7 +1198,7 @@ namespace appProg
 				if (row[2] != DBNull.Value)
 				{
 					string json = row[2].ToString();
-					if(json != "[]") {
+					if (json != "[]") {
 						try
 						{
 							var _dishes = JsonConvert.DeserializeObject<List<Dictionary<int, int>>>(row[2].ToString());
@@ -1196,7 +1208,7 @@ namespace appProg
 								dish.id = _dish.Keys.ElementAt(0);
 								dish.count = _dish.Values.ElementAt(0);
 								detailDish __dish = DB.getDishByID(dish.id);
-								if(__dish != null) {
+								if (__dish != null) {
 									dish.name = __dish.name;
 									dish.cost = __dish.cost;
 									dishes.Add(dish);
@@ -1263,7 +1275,7 @@ namespace appProg
 		{
 			try {
 				connection.Close();
-			}catch(MySqlException e) {
+			} catch (MySqlException e) {
 				Console.WriteLine(e);
 				MessageBox.Show("Не удалось закрыть подключение к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				Environment.Exit(-1);
@@ -1284,7 +1296,7 @@ namespace appProg
 
 		private int insert(string SQL) {
 			int insertID = -1;
-			
+
 			try
 			{
 				this.connect();
@@ -1292,7 +1304,7 @@ namespace appProg
 				this.open();
 				insertID = Convert.ToInt32(query.ExecuteScalar());
 			}
-			catch(Exception e) {
+			catch (Exception e) {
 				Console.WriteLine(e);
 			}
 			finally {
@@ -1324,7 +1336,7 @@ namespace appProg
 
 			return success;
 		}
-		private bool delete(string SQL) 
+		private bool delete(string SQL)
 		{
 			bool success = false;
 
@@ -1439,7 +1451,7 @@ namespace appProg
 		public List<dishInOrder> dishes = new List<dishInOrder>();
 	}
 
-	public class dishInOrder{
+	public class dishInOrder {
 		public int id;
 		public string name;
 		public float cost;
@@ -1454,4 +1466,28 @@ namespace appProg
 		public string header;
 		public int width;
 	}
+
+	public class PDFGenerator
+	{
+		string html = @"<!DOCTYPE html>
+					<html>
+					<body>
+
+					<h1>My First Heading</h1>
+
+					<p>My first paragraph.</p>
+					<script>window.print();</script>
+					</body>
+					</html>
+					";
+		static string path = @"D:\\review.html";
+
+		public PDFGenerator()
+		{
+			//File.Create(path);
+			File.WriteAllText(path, html);
+			System.Diagnostics.Process.Start(path);
+		}
+	}
 }
+

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			this.btnAppClose = new System.Windows.Forms.Button();
 			this.menu = new System.Windows.Forms.TabControl();
 			this.dishDetail = new System.Windows.Forms.TabControl();
@@ -41,6 +42,13 @@
 			this.btnIncCountDish = new System.Windows.Forms.Button();
 			this.btnDecCountDish = new System.Windows.Forms.Button();
 			this.btnOpenOrder = new System.Windows.Forms.Button();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.manuStrip_review = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip_exportPDF = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip_order = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip_app = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip_closeApp = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// btnAppClose
@@ -171,6 +179,53 @@
 			this.btnOpenOrder.UseVisualStyleBackColor = true;
 			this.btnOpenOrder.Click += new System.EventHandler(this.openOrder_Click);
 			// 
+			// menuStrip1
+			// 
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.manuStrip_review,
+            this.menuStrip_order,
+            this.menuStrip_app});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Size = new System.Drawing.Size(918, 24);
+			this.menuStrip1.TabIndex = 17;
+			this.menuStrip1.Text = "menuStrip1";
+			// 
+			// manuStrip_review
+			// 
+			this.manuStrip_review.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStrip_exportPDF});
+			this.manuStrip_review.Name = "manuStrip_review";
+			this.manuStrip_review.Size = new System.Drawing.Size(51, 20);
+			this.manuStrip_review.Text = "Отчет";
+			// 
+			// menuStrip_exportPDF
+			// 
+			this.menuStrip_exportPDF.Name = "menuStrip_exportPDF";
+			this.menuStrip_exportPDF.Size = new System.Drawing.Size(152, 22);
+			this.menuStrip_exportPDF.Text = "Экспорт в PDF";
+			// 
+			// menuStrip_order
+			// 
+			this.menuStrip_order.Name = "menuStrip_order";
+			this.menuStrip_order.Size = new System.Drawing.Size(49, 20);
+			this.menuStrip_order.Text = "Заказ";
+			// 
+			// menuStrip_app
+			// 
+			this.menuStrip_app.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStrip_closeApp});
+			this.menuStrip_app.Name = "menuStrip_app";
+			this.menuStrip_app.Size = new System.Drawing.Size(91, 20);
+			this.menuStrip_app.Text = "Приложение";
+			// 
+			// menuStrip_closeApp
+			// 
+			this.menuStrip_closeApp.Name = "menuStrip_closeApp";
+			this.menuStrip_closeApp.Size = new System.Drawing.Size(152, 22);
+			this.menuStrip_closeApp.Text = "Закрыть";
+			this.menuStrip_closeApp.Click += new System.EventHandler(this.menuStrip_closeApp_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -189,6 +244,9 @@
 			this.Controls.Add(this.dishDetail);
 			this.Controls.Add(this.menu);
 			this.Controls.Add(this.btnAppClose);
+			this.Controls.Add(this.menuStrip1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MainMenuStrip = this.menuStrip1;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "Form1";
@@ -196,6 +254,8 @@
 			this.Text = "Кафе";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.Load += new System.EventHandler(this.onLoad);
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -215,6 +275,12 @@
 		private System.Windows.Forms.Button btnIncCountDish;
 		private System.Windows.Forms.Button btnDecCountDish;
 		private System.Windows.Forms.Button btnOpenOrder;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem manuStrip_review;
+		private System.Windows.Forms.ToolStripMenuItem menuStrip_order;
+		private System.Windows.Forms.ToolStripMenuItem menuStrip_app;
+		private System.Windows.Forms.ToolStripMenuItem menuStrip_closeApp;
+		private System.Windows.Forms.ToolStripMenuItem menuStrip_exportPDF;
 	}
 }
 

@@ -899,7 +899,7 @@ $(document).ready(function () {
 									}else if(res.error)
 										$response.html(Alert.error(res.error));
 									else
-										$response.html('Неизвестная ответ сервера');
+										$response.html('Неизвестный ответ сервера');
 								},
 								error: function (res) {
 									if(res.status && res.statusText && res.statusText.length)
