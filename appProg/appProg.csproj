@@ -55,21 +55,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DB.cs" />
-    <Compile Include="dishDetailForm.cs">
+    <Compile Include="MySQL\DB.cs" />
+    <Compile Include="Forms\dishDetailForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="dishDetailForm.Designer.cs">
+    <Compile Include="Forms\dishDetailForm.Designer.cs">
       <DependentUpon>dishDetailForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gallery.cs">
+    <Compile Include="Controls\Gallery.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
@@ -77,24 +77,24 @@
     <Compile Include="Models\dishInOrder.cs" />
     <Compile Include="Models\orderDish.cs" />
     <Compile Include="Models\prewiewDish.cs" />
-    <Compile Include="orderForm.cs">
+    <Compile Include="Forms\orderForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="orderForm.Designer.cs">
+    <Compile Include="Forms\orderForm.Designer.cs">
       <DependentUpon>orderForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PDFGenerator.cs" />
+    <Compile Include="Other\PDFGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils.cs" />
-    <EmbeddedResource Include="dishDetailForm.resx">
+    <Compile Include="Other\Utils.cs" />
+    <EmbeddedResource Include="Forms\dishDetailForm.resx">
       <DependentUpon>dishDetailForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="orderForm.resx">
+    <EmbeddedResource Include="Forms\orderForm.resx">
       <DependentUpon>orderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coffee-cup.ico" />
+    <Content Include="MySQL\create tables\images.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
