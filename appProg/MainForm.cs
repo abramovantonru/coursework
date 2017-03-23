@@ -31,7 +31,7 @@ namespace appProg
 		public static List<int> selectedDishes = new List<int>();
 		public static orderForm orderForm;
 
-		public static Form detailImageWindow;
+		public static Form detailImageWindow = new Form();
 
 		/**
 		 * Constructor of main window

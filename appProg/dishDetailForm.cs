@@ -192,7 +192,6 @@ namespace appProg
 		{
 			if (img != null)
 			{
-				MainForm.detailImageWindow = new Form();
 				MainForm.detailImageWindow.Hide();
 				PictureBox image = new PictureBox();
 
