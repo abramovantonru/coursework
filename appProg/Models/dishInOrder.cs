@@ -13,5 +13,7 @@ namespace appProg
 		public string name;
 		public float cost;
 		public int count;
+		public float weight;
+		public int energy; 
 	}
 }

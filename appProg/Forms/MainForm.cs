@@ -11,15 +11,13 @@
  * - Save order
  * - Remove order
  * */
-using appProg.Properties;
-using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static appProg.DB;
 
 namespace appProg
 {
@@ -45,7 +43,6 @@ namespace appProg
 			 * */
 			menuSections = DB.getMenuSections(); // get all exist sections
 			createTabs(menuSections); // create tabs by found sections
-
 			loadTabDishes(0); // fill data to first tab
 		}
 
@@ -158,6 +155,128 @@ namespace appProg
 		{
 			orderForm = new orderForm();
 			orderForm.Show();
+		}
+
+		private void stripMenu_exportByDates_Click(object sender, EventArgs e)
+		{
+			Form openOrderDialog = new Form();
+			DateTimePicker fromPicker = new DateTimePicker();
+			DateTimePicker toPicker = new DateTimePicker();
+			Button OK = new Button();
+			Button Cancel = new Button();
+
+			int wh = 200;
+			openOrderDialog.Width = openOrderDialog.Height = wh;
+			openOrderDialog.Text = "Сгенерировать отчет по датам";
+			openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
+			openOrderDialog.ControlBox = false;
+			openOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
+			openOrderDialog.Icon = Properties.Resources.coffee_cup;
+
+			OK.Width = 100;
+			Cancel.Width = 60;
+			OK.Location = new Point(
+				wh / 2 - OK.Width / 2,
+				wh / 2
+			);
+			//event for ok button
+			OK.Click += (s, ev) => {
+				string from = fromPicker.Value.ToShortDateString();
+				string to = toPicker.Value.ToShortDateString();
+
+				PDFGenerator pdf = new PDFGenerator();
+				pdf.ordersByDates(from, to);
+			};
+			OK.Text = "Сгенерировать";
+
+			Cancel.DialogResult = DialogResult.Cancel;
+			Cancel.Location = new Point(
+				wh / 2 - Cancel.Width / 2,
+				wh / 2 + OK.PreferredSize.Height + 10
+			);
+			//event for cancel button
+			Cancel.Click += (s, ev) => {
+				openOrderDialog.Close();
+			};
+			Cancel.Text = "Отмена";
+
+			fromPicker.Width = toPicker.Width = wh / 2;
+			fromPicker.Format = toPicker.Format = DateTimePickerFormat.Short;
+			fromPicker.Location = new Point(
+				wh / 2 - fromPicker.Width / 2,
+				wh / 2 - fromPicker.Height * 4
+			);
+			toPicker.Location = new Point(
+				wh / 2 - toPicker.Width / 2,
+				wh / 2 - toPicker.Height * 2
+			);
+
+			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, fromPicker, toPicker });
+			openOrderDialog.Show();
+		}
+
+		private void menuStrip_exportByID_Click(object sender, EventArgs e)
+		{
+			Form openOrderDialog = new Form();
+			TextBox input = new TextBox();
+			Button OK = new Button();
+			Button Cancel = new Button();
+			Label info = new Label();
+
+			int wh = 200;
+			openOrderDialog.Width = openOrderDialog.Height = wh;
+			openOrderDialog.Text = "Сгенерировать отчет по номеру";
+			openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
+			openOrderDialog.ControlBox = false;
+			openOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+			info.Text = "Введите номер заказа";
+			info.Width = wh;
+			info.Location = new Point(
+				wh / 2 - info.PreferredWidth / 2,
+				info.Height
+			);
+
+			OK.Width = 100;
+			Cancel.Width = 60;
+			OK.Location = new Point(
+				wh / 2 - OK.Width / 2,
+				wh / 2
+			);
+			//event for ok button
+			OK.Click += (s, ev) => {
+				int id = Convert.ToInt32(input.Text);
+				if (DB.existOrderByID(id))
+				{
+					PDFGenerator pdf = new PDFGenerator();
+					pdf.orderByID(id);
+				}
+				else
+				{
+					MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			};
+			OK.Text = "Сгенерировать";
+
+			Cancel.DialogResult = DialogResult.Cancel;
+			Cancel.Location = new Point(
+				wh / 2 - Cancel.Width / 2,
+				wh / 2 + OK.PreferredSize.Height  + 10
+			);
+			//event for cancel button
+			Cancel.Click += (s, ev) => {
+				openOrderDialog.Close();
+			};
+			Cancel.Text = "Отмена";
+
+			input.Location = new Point(
+				wh / 2 - input.Width / 2,
+				wh / 2 - input.Height * 2
+			);
+			input.KeyPress += Util.keyPress_onlyInt;
+
+			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
+			openOrderDialog.Show();
 		}
 	}
 

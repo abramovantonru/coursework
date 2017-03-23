@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using appProg.MySQL;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -299,6 +300,100 @@ namespace appProg
 					dishes = dishes
 				};
 			}
+			return order;
+		}
+
+		public static List<printOrder> getPrintOrdersByDates(string from, string to) {
+			List<printOrder> orders = new List<printOrder>();
+			DB db = new DB();
+			DBResult result = db.exec("SELECT * FROM " + tables["order"] + " WHERE `date` BETWEEN " + 
+				"STR_TO_DATE('" + from + " 00:00:00', '%d.%m.%Y %H:%i:%s')" + 
+				"AND STR_TO_DATE('" + to + " 23:59:59', '%d.%m.%Y %H:%i:%s');");
+
+			if (result.success && !result.empty)
+			{
+				foreach(var row in result.data) {
+					int id = Convert.ToInt32(row[0]);
+					string date = row[1].ToString();
+					int energy = 0;
+
+					var dishes = new List<dishInOrder>();
+					var _dishes = JsonConvert.DeserializeObject<List<Dictionary<int, int>>>(row[2].ToString());
+					foreach (var _dish in _dishes)
+					{
+						dishInOrder dish = new dishInOrder();
+						dish.id = _dish.Keys.ElementAt(0);
+						dish.count = _dish.Values.ElementAt(0);
+						detailDish __dish = DB.getDishByID(dish.id);
+						if (__dish != null)
+						{
+							dish.name = __dish.name;
+							dish.cost = __dish.cost;
+							energy += __dish.energy;
+							dish.cost = __dish.cost;
+							dishes.Add(dish);
+						}
+					}
+
+					var order = new printOrder
+					{
+						id = id,
+						date = date,
+						energy = energy,
+						dishes = dishes
+					};
+					orders.Add(order);
+				}
+			}
+
+			return orders;
+		}
+
+		public static printOrder getPrintOrderByID(int id)
+		{
+			printOrder order = null;
+
+			DB db = new DB();
+			DBResult result = db.exec("SELECT * FROM " + tables["order"] + " WHERE id = " + id + " LIMIT 1;");
+
+			if (result.success)
+			{
+				var row = result.data[0];
+				string date = row[1].ToString();
+				int energy = 0;
+				float total = 0.0f;
+
+				var dishes = new List<dishInOrder>();
+				var _dishes = JsonConvert.DeserializeObject<List<Dictionary<int, int>>>(row[2].ToString());
+				foreach (var _dish in _dishes)
+				{
+					dishInOrder dish = new dishInOrder();
+					dish.id = _dish.Keys.ElementAt(0);
+					dish.count = _dish.Values.ElementAt(0);
+					detailDish __dish = DB.getDishByID(dish.id);
+					if (__dish != null)
+					{
+						dish.name = __dish.name;
+						dish.cost = __dish.cost;
+						dish.energy = __dish.energy;
+						dish.cost = __dish.cost;
+						energy += __dish.energy;
+						total += __dish.cost;
+						
+						dishes.Add(dish);
+					}
+				}
+
+				order = new printOrder
+				{
+					id = id,
+					date = date,
+					energy = energy,
+					total = total,
+					dishes = dishes
+				};
+			}
+
 			return order;
 		}
 		/**

@@ -32,7 +32,8 @@
 			this.menu = new System.Windows.Forms.TabControl();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.manuStrip_review = new System.Windows.Forms.ToolStripMenuItem();
-			this.menuStrip_exportPDF = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuStrip_exportByID = new System.Windows.Forms.ToolStripMenuItem();
+			this.stripMenu_exportByDates = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip_order = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip_app = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip_closeApp = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,16 +65,25 @@
 			// manuStrip_review
 			// 
 			this.manuStrip_review.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuStrip_exportPDF});
+            this.menuStrip_exportByID,
+            this.stripMenu_exportByDates});
 			this.manuStrip_review.Name = "manuStrip_review";
 			this.manuStrip_review.Size = new System.Drawing.Size(51, 20);
 			this.manuStrip_review.Text = "Отчет";
 			// 
-			// menuStrip_exportPDF
+			// menuStrip_exportByID
 			// 
-			this.menuStrip_exportPDF.Name = "menuStrip_exportPDF";
-			this.menuStrip_exportPDF.Size = new System.Drawing.Size(152, 22);
-			this.menuStrip_exportPDF.Text = "Экспорт в PDF";
+			this.menuStrip_exportByID.Name = "menuStrip_exportByID";
+			this.menuStrip_exportByID.Size = new System.Drawing.Size(152, 22);
+			this.menuStrip_exportByID.Text = "По заказу";
+			this.menuStrip_exportByID.Click += new System.EventHandler(this.menuStrip_exportByID_Click);
+			// 
+			// stripMenu_exportByDates
+			// 
+			this.stripMenu_exportByDates.Name = "stripMenu_exportByDates";
+			this.stripMenu_exportByDates.Size = new System.Drawing.Size(152, 22);
+			this.stripMenu_exportByDates.Text = "По периоду";
+			this.stripMenu_exportByDates.Click += new System.EventHandler(this.stripMenu_exportByDates_Click);
 			// 
 			// menuStrip_order
 			// 
@@ -126,7 +136,8 @@
 		private System.Windows.Forms.ToolStripMenuItem menuStrip_order;
 		private System.Windows.Forms.ToolStripMenuItem menuStrip_app;
 		private System.Windows.Forms.ToolStripMenuItem menuStrip_closeApp;
-		private System.Windows.Forms.ToolStripMenuItem menuStrip_exportPDF;
+		private System.Windows.Forms.ToolStripMenuItem menuStrip_exportByID;
+		private System.Windows.Forms.ToolStripMenuItem stripMenu_exportByDates;
 	}
 }
 
