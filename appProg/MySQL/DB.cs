@@ -308,7 +308,7 @@ namespace appProg
 			DB db = new DB();
 			DBResult result = db.exec("SELECT * FROM " + tables["order"] + " WHERE `date` BETWEEN " + 
 				"STR_TO_DATE('" + from + " 00:00:00', '%d.%m.%Y %H:%i:%s')" + 
-				"AND STR_TO_DATE('" + to + " 23:59:59', '%d.%m.%Y %H:%i:%s');");
+				"AND STR_TO_DATE('" + to + " 23:59:59', '%d.%m.%Y %H:%i:%s') ORDER BY `date` ASC;");
 
 			if (result.success && !result.empty)
 			{
