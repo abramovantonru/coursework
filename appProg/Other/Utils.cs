@@ -1,4 +1,5 @@
 ﻿using appProg.Properties;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -44,6 +45,26 @@ namespace appProg
 				e.Handled = true;
 		}
 
+		public static bool checkFile(string path)
+		{
+			if (File.Exists(path))
+				return true;
+			else
+				return false;
+		}
 
+		public static void createDir(string dir)
+		{
+			try
+			{
+				if (!Directory.Exists(dir))
+					Directory.CreateDirectory(dir);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				MessageBox.Show("Не удалось создать директорию!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
 	}
 }

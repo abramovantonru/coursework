@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using appProg.Other;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -345,75 +346,77 @@ namespace appProg
 
 		private void btnOpenOrder_Click(object sender, EventArgs e)
 		{
-			openOrderDialog = new Form();
-			TextBox input = new TextBox();
-			Button OK = new Button();
-			Button Cancel = new Button();
-			Label info = new Label();
+			if (Security.isAdmin()) {
+				openOrderDialog = new Form();
+				TextBox input = new TextBox();
+				Button OK = new Button();
+				Button Cancel = new Button();
+				Label info = new Label();
 
-			int wh = 200;
-			openOrderDialog.Width = openOrderDialog.Height = wh;
-			openOrderDialog.Text = "Открыть заказ по номеру";
-			openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
-			openOrderDialog.ControlBox = false;
-			openOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
+				int wh = 200;
+				openOrderDialog.Width = openOrderDialog.Height = wh;
+				openOrderDialog.Text = "Открыть заказ по номеру";
+				openOrderDialog.StartPosition = FormStartPosition.CenterScreen;
+				openOrderDialog.ControlBox = false;
+				openOrderDialog.FormBorderStyle = FormBorderStyle.FixedSingle;
 
-			info.Text = "Введите номер заказа";
-			info.Width = wh;
-			info.Location = new Point(
-				wh / 2 - info.PreferredWidth / 2,
-				info.Height
-			);
+				info.Text = "Введите номер заказа";
+				info.Width = wh;
+				info.Location = new Point(
+					wh / 2 - info.PreferredWidth / 2,
+					info.Height
+				);
 
-			OK.Width = Cancel.Width = 60;
-			OK.Location = new Point(
-				wh / 2 - OK.Width - 10,
-				wh / 2
-			);
-			//event for ok button
-			OK.Click += (s, ev) => {
-				int id = Convert.ToInt32(input.Text);
-				if (DB.existOrderByID(id))
-				{
-					if (findOrderIdxByOrderID(id) == -1)
+				OK.Width = Cancel.Width = 60;
+				OK.Location = new Point(
+					wh / 2 - OK.Width - 10,
+					wh / 2
+				);
+				//event for ok button
+				OK.Click += (s, ev) => {
+					int id = Convert.ToInt32(input.Text);
+					if (DB.existOrderByID(id))
 					{
-						int selectedIdx = openOrder(id);
-						openOrderDialog.Close();
-						loadOrdersTabs();
-						if (selectedIdx != -1)
-							orderList.SelectedIndex = selectedIdx;
+						if (findOrderIdxByOrderID(id) == -1)
+						{
+							int selectedIdx = openOrder(id);
+							openOrderDialog.Close();
+							loadOrdersTabs();
+							if (selectedIdx != -1)
+								orderList.SelectedIndex = selectedIdx;
+						}
+						else
+						{
+							MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+						}
 					}
 					else
 					{
-						MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+						MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
-				}
-				else
-				{
-					MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				}
-			};
-			OK.Text = "Открыть";
+				};
+				OK.Text = "Открыть";
 
-			Cancel.DialogResult = DialogResult.Cancel;
-			Cancel.Location = new Point(
-				wh / 2 + 10,
-				wh / 2
-			);
-			//event for cancel button
-			Cancel.Click += (s, ev) => {
-				openOrderDialog.Close();
-			};
-			Cancel.Text = "Отмена";
+				Cancel.DialogResult = DialogResult.Cancel;
+				Cancel.Location = new Point(
+					wh / 2 + 10,
+					wh / 2
+				);
+				//event for cancel button
+				Cancel.Click += (s, ev) => {
+					openOrderDialog.Close();
+				};
+				Cancel.Text = "Отмена";
 
-			input.Location = new Point(
-				wh / 2 - input.Width / 2,
-				wh / 2 - input.Height * 2
-			);
-			input.KeyPress += Util.keyPress_onlyInt;
+				input.Location = new Point(
+					wh / 2 - input.Width / 2,
+					wh / 2 - input.Height * 2
+				);
+				input.KeyPress += Util.keyPress_onlyInt;
 
-			openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
-			openOrderDialog.Show();
+				openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
+				openOrderDialog.Show();
+			}
 		}
 
 		private void btnCreateOrder_Click(object sender, EventArgs e)
@@ -444,21 +447,23 @@ namespace appProg
 
 		private void btnRemoveOrder_Click(object sender, EventArgs e)
 		{
-			int index = orderList.SelectedIndex;
-			if (index > -1 && orders[index] != null)
-			{
-				if (orders[index].name == "Новый заказ")
-					orders.RemoveAt(index);
-				else
+			if(Security.isAdmin()) {
+				int index = orderList.SelectedIndex;
+				if (index > -1 && orders[index] != null)
 				{
-					int id = orders[index].id;
-					if (DB.existOrderByID(id))
-						showRemoveOrderDialog(id);
+					if (orders[index].name == "Новый заказ")
+						orders.RemoveAt(index);
 					else
-						MessageBox.Show("Заказ с данным номером (" + id + ") не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					{
+						int id = orders[index].id;
+						if (DB.existOrderByID(id))
+							showRemoveOrderDialog(id);
+						else
+							MessageBox.Show("Заказ с данным номером (" + id + ") не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
+					orderList.TabPages.Clear();
+					loadOrdersTabs();
 				}
-				orderList.TabPages.Clear();
-				loadOrdersTabs();
 			}
 		}
 
