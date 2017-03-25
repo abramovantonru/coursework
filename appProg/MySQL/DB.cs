@@ -51,7 +51,7 @@ namespace appProg
 		{
 			DB db = new DB();
 			List<string> sections = new List<string>();
-			DBResult result = db.exec("SELECT type FROM " + tables["dishes"] + " ORDER BY CAST(type AS CHAR)");
+			DBResult result = db.exec("SELECT type FROM " + tables["dishes"] + " GROUP BY type ORDER BY CAST(type AS CHAR)");
 
 			if (result.success)
 			{
