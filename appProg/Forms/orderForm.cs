@@ -1,16 +1,12 @@
-﻿using appProg.Other;
+﻿using cafeMenu.Other;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace appProg
+namespace cafeMenu
 {
 	public partial class orderForm : Form
 	{
@@ -452,9 +448,10 @@ namespace appProg
 
 		private void btnRemoveOrder_Click(object sender, EventArgs e)
 		{
-			if(Security.isAdmin()) {
-				int index = orderList.SelectedIndex;
-				if (index > -1 && orders[index] != null)
+			int index = orderList.SelectedIndex;
+			if (index > -1 && orders[index] != null)
+			{
+				if (Security.isAdmin())
 				{
 					if (orders[index].name == "Новый заказ")
 						orders.RemoveAt(index);

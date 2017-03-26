@@ -1,4 +1,4 @@
-﻿namespace appProg.Forms
+﻿namespace cafeMenu.Forms
 {
 	partial class pinForm
 	{

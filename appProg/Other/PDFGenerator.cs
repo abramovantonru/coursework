@@ -1,21 +1,18 @@
-﻿using appProg.MySQL;
+﻿using cafeMenu.MySQL;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
-namespace appProg
+namespace cafeMenu
 {
 	public class PDFGenerator
 	{
 		readonly static string dir = AppDomain.CurrentDomain.BaseDirectory + "reviews";
 
-		public PDFGenerator(string _html = null)
+		public PDFGenerator()
 		{
-			/*this.createDir(dir);
-			string filePath = dir + @"\" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm") + ".html";
-			this.fillHTML(filePath, html);
-			this.open(filePath);*/
+
 		}
 
 		private void createDir(string _dir) {
@@ -60,6 +57,7 @@ namespace appProg
 			if (order == null)
 				MessageBox.Show("Не удалось получить информацию о заказе!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			else {
+				int counts = 0;
 				var _html = @"
 				<html lang=ru>
 					<meta charset='cp-1251'>
@@ -88,8 +86,6 @@ namespace appProg
 					table tbody tr td{border-bottom: 1px solid black;}
 					table tbody tr td{text-align: center;}
 					table tbody tr td:first-child{text-align: left;}
-					table tbody tr td:last-child{text-align: right;}
-					.hidden{display: none;}
 				</style>
 				<div id='print' class=''>
 					<script>
@@ -102,7 +98,7 @@ namespace appProg
 						<tr>
 							<td>Название</td>
 							<td>Грамм</td>
-							<td>кДЖ</td>
+							<td>Ккал</td>
 							<td>Цена</td>
 							<td>Кол-во</td>
 							<td>ИТОГО</td>
@@ -112,23 +108,31 @@ namespace appProg
 						</thead>
 						<tbody id='items'>";
 
-						foreach(var dish in order.dishes)
-							_html += "<tr><td>" + dish.name + @"</td><td>" + dish.weight + "</td><td>" + dish.energy + "</td><td>" + dish.cost + "</td><td>" + dish.count + "</td><td>" + (dish.count * dish.cost) + "</td></tr>";
-						
-						_html += 
+				foreach(var dish in order.dishes) {
+					_html += "<tr><td>" + dish.name + @"</td><td>" + dish.weight + "</td><td>" + dish.energy + "</td><td>" + dish.cost + "</td><td>" + dish.count + "</td><td>" + (dish.count * dish.cost) + "</td></tr>";
+					counts += dish.count;
+				}
+
+						_html +=
 						@"<tfoot>
 						<tr>
-							<td colspan='6' style='text-align: right'><span data-name='total'>" + order.total + @"</span></td>
+							<td colspan='4'>&nbsp;</td>
+							<td style='text-align: center;'>" + counts + @"</td>
+							<td style='text-align: center;'>" + order.total + @"</td>
 						</tr>
 						<tr><td colspan='6'>&nbsp;</td></tr>
 						<tr><td colspan='6'>&nbsp;</td></tr>
 						<tr>
-							<td colspan='4' style='text-align: right'><b>Общая энергетическая ценность, кДж</b></td>
-							<td colspan='2'>" + order.energy + @"</td>
+							<td colspan='3' style='text-align: right'><b>Общий вес, грамм</b></td>
+							<td colspan='3'>" + order.weight + @"</td>
 						</tr>
 						<tr>
-							<td colspan='4' style='text-align: right'><b>Дата и время</b></td>
-							<td colspan='2'>" + order.date + @"</td>
+							<td colspan='3' style='text-align: right'><b>Общая энергетическая ценность, Ккал</b></td>
+							<td colspan='3'>" + order.energy + @"</td>
+						</tr>
+						<tr>
+							<td colspan='3' style='text-align: right'><b>Дата и время</b></td>
+							<td colspan='3'>" + order.date + @"</td>
 						</tr>
 						<tr><td colspan='6'>&nbsp;</td></tr>
 						<tr><td colspan='6'>&nbsp;</td></tr>

@@ -1,14 +1,9 @@
-﻿using appProg.Forms;
+﻿using cafeMenu.Forms;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static appProg.Other.Crypt;
+using static cafeMenu.Other.Crypt;
 
-namespace appProg.Other
+namespace cafeMenu.Other
 {
 	public class Security
 	{
@@ -17,7 +12,6 @@ namespace appProg.Other
 
 		public static bool isAdmin() 
 		{
-			MessageBox.Show(pinFile);
 			md5 hash = new md5();
 			
 			if(Util.checkFile(pinFile)) {

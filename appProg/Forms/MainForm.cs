@@ -1,7 +1,7 @@
 ﻿
 
-using appProg.Forms;
-using appProg.Other;
+using cafeMenu.Forms;
+using cafeMenu.Other;
 /**
 * Abramov Anton (c) 2017
 * abramovanton@ya.ru
@@ -21,7 +21,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace appProg
+namespace cafeMenu
 {
 	public partial class MainForm : Form
 	{

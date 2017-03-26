@@ -1,11 +1,11 @@
-﻿using appProg.Properties;
+﻿using cafeMenu.Properties;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace appProg
+namespace cafeMenu
 {
 	/**
 	 * Other functions for magic

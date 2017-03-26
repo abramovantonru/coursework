@@ -1,15 +1,13 @@
-﻿using appProg.MySQL;
+﻿using cafeMenu.MySQL;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace appProg
+namespace cafeMenu
 {
 	/**
 	 * Class for work with Mysql Data Base;
@@ -237,6 +235,7 @@ namespace appProg
 
 			return insertID;
 		}
+
 		public static bool updateOrder(int id, string json)
 		{
 			DB db = new DB();
@@ -308,7 +307,7 @@ namespace appProg
 			List<printOrder> orders = new List<printOrder>();
 			DB db = new DB();
 			DBResult result = db.exec("SELECT * FROM " + tables["order"] + " WHERE `date` BETWEEN " + 
-				"STR_TO_DATE('" + from + " 00:00:00', '%d.%m.%Y %H:%i:%s')" + 
+				"STR_TO_DATE('" + from + " 00:00:00', '%d.%m.%Y %H:%i:%s') " + 
 				"AND STR_TO_DATE('" + to + " 23:59:59', '%d.%m.%Y %H:%i:%s') ORDER BY `date` ASC;");
 
 			if (result.success && !result.empty)
@@ -316,7 +315,7 @@ namespace appProg
 				foreach(var row in result.data) {
 					int id = Convert.ToInt32(row[0]);
 					string date = row[1].ToString();
-					int energy = 0;
+					float total = 0.0f;
 
 					var dishes = new List<dishInOrder>();
 					var _dishes = JsonConvert.DeserializeObject<List<Dictionary<int, int>>>(row[2].ToString());
@@ -330,8 +329,8 @@ namespace appProg
 						{
 							dish.name = __dish.name;
 							dish.cost = __dish.cost;
-							energy += __dish.energy;
-							dish.cost = __dish.cost;
+							total += __dish.cost;
+							
 							dishes.Add(dish);
 						}
 					}
@@ -340,8 +339,8 @@ namespace appProg
 					{
 						id = id,
 						date = date,
-						energy = energy,
-						dishes = dishes
+						dishes = dishes,
+						total = total
 					};
 					orders.Add(order);
 				}
@@ -362,6 +361,7 @@ namespace appProg
 				var row = result.data[0];
 				string date = row[1].ToString();
 				int energy = 0;
+				float weight = 0.0f;
 				float total = 0.0f;
 
 				var dishes = new List<dishInOrder>();
@@ -377,7 +377,10 @@ namespace appProg
 						dish.name = __dish.name;
 						dish.cost = __dish.cost;
 						dish.energy = __dish.energy;
+						dish.weight = __dish.weight;
 						dish.cost = __dish.cost;
+
+						weight += __dish.weight;
 						energy += __dish.energy;
 						total += __dish.cost;
 						
@@ -390,6 +393,7 @@ namespace appProg
 					id = id,
 					date = date,
 					energy = energy,
+					weight = weight,
 					total = total,
 					dishes = dishes
 				};

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace appProg
+namespace cafeMenu
 {
 	/**
 	 * Dish class for view dish in list of order

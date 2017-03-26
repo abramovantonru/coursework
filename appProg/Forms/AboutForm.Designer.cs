@@ -1,4 +1,4 @@
-﻿namespace appProg.Forms
+﻿namespace cafeMenu.Forms
 {
 	partial class AboutForm
 	{
@@ -60,7 +60,7 @@
 			// 
 			// pictureBox1
 			// 
-			this.pictureBox1.Image = global::appProg.Properties.Resources.png_coffe_cup;
+			this.pictureBox1.Image = global::cafeMenu.Properties.Resources.png_coffe_cup;
 			this.pictureBox1.Location = new System.Drawing.Point(12, 12);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(222, 194);

@@ -1,4 +1,4 @@
-﻿namespace appProg
+﻿namespace cafeMenu
 {
 	partial class orderForm
 	{

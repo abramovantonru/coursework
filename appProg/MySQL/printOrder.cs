@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace appProg.MySQL
+namespace cafeMenu.MySQL
 {
 	public class printOrder
 	{
@@ -12,6 +8,7 @@ namespace appProg.MySQL
 		public string date;
 		public int energy;
 		public float total;
+		public float weight;
 		public List<dishInOrder> dishes = new List<dishInOrder>();
 	};
 }

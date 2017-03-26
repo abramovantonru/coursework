@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 
-namespace appProg
+namespace cafeMenu
 {
 	/**
 	* Dish class for detail view

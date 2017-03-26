@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace appProg.Properties {
+namespace cafeMenu.Properties {
     using System;
     
     

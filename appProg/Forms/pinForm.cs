@@ -1,10 +1,10 @@
-﻿using appProg.Other;
+﻿using cafeMenu.Other;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static appProg.Other.Crypt;
+using static cafeMenu.Other.Crypt;
 
-namespace appProg.Forms
+namespace cafeMenu.Forms
 {
 	public partial class pinForm : Form
 	{
