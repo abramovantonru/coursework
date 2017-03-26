@@ -1,5 +1,6 @@
 ﻿
 
+using appProg.Forms;
 using appProg.Other;
 /**
 * Abramov Anton (c) 2017
@@ -19,7 +20,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using static appProg.DB;
 
 namespace appProg
 {
@@ -27,6 +27,7 @@ namespace appProg
 	{
 		private List<string> menuSections; // tabs of menu
 		private DataGridView[] menuTables; // tables of menu
+		private static AboutForm about; // about programm form
 
 		public static List<int> selectedDishes = new List<int>();
 		public static orderForm orderForm;
@@ -155,8 +156,13 @@ namespace appProg
 
 		private void menuStrip_order_Click(object sender, EventArgs e)
 		{
-			orderForm = new orderForm();
-			orderForm.Show();
+			if(orderForm == null) {
+				orderForm = new orderForm();
+				orderForm.FormClosed += (s, ev) => { orderForm = null; };
+				orderForm.Show();
+			}else {
+				orderForm.Focus();
+			}
 		}
 
 		private void stripMenu_exportByDates_Click(object sender, EventArgs e)
@@ -284,6 +290,18 @@ namespace appProg
 				openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
 				openOrderDialog.Show();
 			}
+		}
+
+		private void about_app_Click(object sender, EventArgs e)
+		{
+			if (about == null)
+			{
+				about = new AboutForm();
+				about.FormClosed += (s, ev) => { about = null; };
+				about.Show();
+			}
+			else
+				about.Focus();
 		}
 	}
 

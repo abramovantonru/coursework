@@ -182,6 +182,7 @@ namespace appProg
 				{
 					id = id,
 					name = name,
+					description = description,
 					images = images,
 					proteins = proteins,
 					fats = fats,

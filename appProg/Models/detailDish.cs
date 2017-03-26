@@ -10,6 +10,7 @@ namespace appProg
 	{
 		public int id;
 		public string name;
+		public string description;
 		public string type;
 		public List<Image> images;
 		public float proteins;

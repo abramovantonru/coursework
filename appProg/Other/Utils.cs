@@ -1,5 +1,6 @@
 ﻿using appProg.Properties;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -65,6 +66,11 @@ namespace appProg
 				Console.WriteLine(e);
 				MessageBox.Show("Не удалось создать директорию!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
+		}
+
+		public static void openScreenKeyboard()
+		{
+			Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\system32\\osk.exe");
 		}
 	}
 }

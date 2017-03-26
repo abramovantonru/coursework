@@ -78,5 +78,10 @@ namespace appProg.Forms
 			else if (e.KeyCode == Keys.Escape)
 				this.DialogResult = DialogResult.Cancel;
 		}
+
+		private void screenKeyboard_Click(object sender, System.EventArgs e)
+		{
+			Util.openScreenKeyboard();
+		}
 	}
 }

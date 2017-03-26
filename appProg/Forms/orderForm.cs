@@ -116,6 +116,8 @@ namespace appProg
 					loadOrderTabDishes(i);
 				}
 			}
+
+			MainForm.orderForm.Focus();
 		}
 
 		public static void addDishToOrder(int id, string name, float cost, int count)
@@ -364,7 +366,7 @@ namespace appProg
 				info.Width = wh;
 				info.Location = new Point(
 					wh / 2 - info.PreferredWidth / 2,
-					info.Height
+					wh / 2 - info.Height * 3
 				);
 
 				OK.Width = Cancel.Width = 60;
@@ -374,25 +376,23 @@ namespace appProg
 				);
 				//event for ok button
 				OK.Click += (s, ev) => {
-					int id = Convert.ToInt32(input.Text);
-					if (DB.existOrderByID(id))
-					{
-						if (findOrderIdxByOrderID(id) == -1)
+					if (input.Text.Length != 0) {
+						int id = Convert.ToInt32(input.Text);
+						if (DB.existOrderByID(id))
 						{
-							int selectedIdx = openOrder(id);
-							openOrderDialog.Close();
-							loadOrdersTabs();
-							if (selectedIdx != -1)
-								orderList.SelectedIndex = selectedIdx;
+							if (findOrderIdxByOrderID(id) == -1)
+							{
+								int selectedIdx = openOrder(id);
+								openOrderDialog.Close();
+								loadOrdersTabs();
+								if (selectedIdx != -1)
+									orderList.SelectedIndex = selectedIdx;
+							}
+							else
+								MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 						}
 						else
-						{
-							MessageBox.Show("Заказ с данным номером (" + id + ") уже открыт.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-						}
-					}
-					else
-					{
-						MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+							MessageBox.Show("Заказ с данным номером (" + id + ") не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
 				};
 				OK.Text = "Открыть";
@@ -414,7 +414,12 @@ namespace appProg
 				);
 				input.KeyPress += Util.keyPress_onlyInt;
 
-				openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info });
+				MenuStrip menu = new MenuStrip();
+				ToolStripItem sreenKeyboard = new ToolStripMenuItem("Экранная клавиатура");
+				sreenKeyboard.Click += (s, ev) => { Util.openScreenKeyboard(); };
+				menu.Items.Add(sreenKeyboard);
+
+				openOrderDialog.Controls.AddRange(new Control[] { OK, Cancel, input, info, menu });
 				openOrderDialog.Show();
 			}
 		}

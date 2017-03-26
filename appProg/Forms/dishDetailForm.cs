@@ -12,7 +12,8 @@ namespace appProg
 {
 	public partial class dishDetailForm : Form
 	{
-		private static Form detailImageWindow; // window for view detail image of dish
+		private static Form detailImageForm; // window for view detail image of dish
+		private static PictureBox detailImageBox;
 		private static detailDish selectedDish;
 
 		public dishDetailForm(int id)
@@ -91,14 +92,32 @@ namespace appProg
 			detailDishTable.Height = detailDishTable.Rows.GetRowsHeight(DataGridViewElementStates.Displayed) + rowHeight;
 
 			// crate label for dish name
-			Label name = new Label();
+			RichTextBox name = new RichTextBox();
 			name.Text = dish.name;
 			name.Location = new Point(
 				10,
 				height / 2 + 10
 			);
 			name.Font = new Font("Calibri", 24, FontStyle.Bold);
-			name.Height = name.Font.Height;
+			name.Width = width - 20;
+			name.Multiline = true;
+			name.BorderStyle = BorderStyle.None;
+			name.ScrollBars = RichTextBoxScrollBars.None;
+			name.Height += name.Margin.Vertical + SystemInformation.VerticalResizeBorderThickness;
+
+			//create label for description
+			RichTextBox description = new RichTextBox();
+			description.Text = dish.description;
+			description.Location = new Point(
+				10,
+				height / 2 + name.Height + 10
+			);
+			description.Font = new Font("Calibri", 14, FontStyle.Bold);
+			description.Width = width - 20;
+			description.Multiline = true;
+			description.BorderStyle = BorderStyle.None;
+			description.ScrollBars = RichTextBoxScrollBars.None;
+			description.Height += description.Margin.Vertical + SystemInformation.VerticalResizeBorderThickness;
 
 			// images exist
 			if (dish.images.Any())
@@ -141,6 +160,7 @@ namespace appProg
 
 			mainTab.BackColor = Color.White;
 			mainTab.Controls.Add(name);
+			mainTab.Controls.Add(description);
 			mainTab.Controls.Add(detailDishTable);
 			this.dishDetail.TabPages.Add(mainTab);
 			if (imageTab != null)
@@ -166,6 +186,9 @@ namespace appProg
 			int count = getCountOfSelectedDish();
 			if(MainForm.orderForm == null) {
 				MainForm.orderForm = new orderForm();
+				MainForm.orderForm.FormClosed += (s, ev) => {
+					MainForm.orderForm = null;
+				};
 				MainForm.orderForm.Show();
 			}
 
@@ -192,26 +215,35 @@ namespace appProg
 		{
 			if (img != null)
 			{
-				MainForm.detailImageWindow = new Form();
-				MainForm.detailImageWindow.Hide();
-				PictureBox image = new PictureBox();
+				if (detailImageForm == null)
+					detailImageForm = new Form();
+				else
+					detailImageForm.Focus();
+
+				if(detailImageBox == null)
+					detailImageBox = new PictureBox();
 
 				// settings full size image of dish
-				image.Image = img;
-				image.Height = img.Height;
-				image.Width = img.Width;
-				image.Left = image.Top = 0;
+				detailImageBox.Image = img;
+				detailImageBox.Height = img.Height;
+				detailImageBox.Width = img.Width;
+				detailImageBox.Left = detailImageBox.Top = 0;
+
+				detailImageForm.FormClosed += (s, ev) => {
+					detailImageForm = null;
+					detailImageBox = null;
+				};
 
 				// settings window
-				MainForm.detailImageWindow.Height = image.Height;
-				MainForm.detailImageWindow.Width = image.Width;
-				MainForm.detailImageWindow.StartPosition = FormStartPosition.CenterScreen;
-				MainForm.detailImageWindow.Text = dishName;
-				MainForm.detailImageWindow.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+				detailImageForm.Height = detailImageBox.Height;
+				detailImageForm.Width = detailImageBox.Width;
+				detailImageForm.StartPosition = FormStartPosition.CenterScreen;
+				detailImageForm.Text = dishName;
+				detailImageForm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
 
 				// join image and window
-				MainForm.detailImageWindow.Controls.Add(image);
-				MainForm.detailImageWindow.Show();
+				detailImageForm.Controls.Add(detailImageBox);
+				detailImageForm.Show();
 			}
 		}
 
